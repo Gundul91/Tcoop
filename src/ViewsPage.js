@@ -11,7 +11,7 @@ class ViewsPage extends Component {
       views.forEach((element) => element.style.width = "calc(100% * (1/2))");
     }
     if(views.length < 2) {
-      document.getElementById("player0").style.height = "100%";
+      document.querySelector(".SingleView").style.height = "100%";
     }
   }
 

@@ -1,15 +1,10 @@
 #root,
 .App,
-.VideosContainer,
-#player0,
-#player1,
-#player2,
-#player3 {
-  height: 50%;
+.VideosContainer {
+  height: 100%;
 }
 
 .VideosContainer {
-  border: solid red 1px;
   display: inline-flex;
   flex-wrap: wrap;
   width: 75%;
@@ -30,10 +25,14 @@
   width: calc(100% * (1/2));
   padding: 0;
   margin: 0;
-  height: 100%;
+  height: 50%;
 }
 
 #chat_embed_1,
 #chat_embed_2 {
   display: none;
+}
+
+.SingleView > div {
+  height: 100%;
 }
