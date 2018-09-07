@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import SingleView from './SingleView.js'
 import Chat from './Chat.js'
+import { Link } from 'react-router-dom'
 
 class ViewsPage extends Component {
   componentDidMount () {
@@ -12,6 +13,14 @@ class ViewsPage extends Component {
     }
     if(views.length < 2) {
       document.querySelector(".SingleView").style.height = "100%";
+    }
+  }
+
+  chatClick(index) {
+    console.log(index)
+    for(let i=0; i<3; i++)
+    {
+      document.getElementById('chat_embed_' + i).style.display = index === i ? "block" : "none"
     }
   }
 
@@ -34,6 +43,11 @@ class ViewsPage extends Component {
           }
         </div>
         <div className="Chats">
+          {
+            streamers.map((item, index) =>
+              <button className="chatButton" onClick={this.chatClick.bind(this, index)} >{item}</button>
+            )
+          }
           {
             streamers.map((item, index) =>
               <Chat

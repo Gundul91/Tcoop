@@ -4,6 +4,10 @@
   height: 100%;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 .VideosContainer {
   display: inline-flex;
   flex-wrap: wrap;
@@ -35,4 +39,10 @@
 
 .SingleView > div {
   height: 100%;
+}
+
+.chatButton {
+  display: inline-block;
+  border: solid grey 1px;
+  width: 50%;
 }
