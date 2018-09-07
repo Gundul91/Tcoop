@@ -11,25 +11,31 @@
 .VideosContainer {
   display: inline-flex;
   flex-wrap: wrap;
-  width: 75%;
+  width: 76%;
   height: 100vh;
   justify-content: center;
   align-items: center;
   float: left;
+  overflow: hidden;
 }
 
 .Chats {
-  border: solid red 1px;
+  border: solid grey 1px;
   display: inline-block;
   width: 24%;
-  height: 90vh;
+  overflow: auto;
 }
 
 .SingleView {
-  width: calc(100% * (1/2));
+  width: 50%;
   padding: 0;
   margin: 0;
   height: 50%;
+}
+
+.Chats > iframe {
+  display: table-cell;
+  height: calc(100vh - 46px);
 }
 
 #chat_embed_1,
@@ -41,8 +47,20 @@
   height: 100%;
 }
 
-.chatButton {
+.ChatButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  height: 40px;
+}
+
+.ChatButton {
   display: inline-block;
   border: solid grey 1px;
   width: 50%;
+}
+
+.tw-pd-1 {
+  top: 200px;
 }

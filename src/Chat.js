@@ -8,7 +8,7 @@ class Chat extends Component {
   render() {
     return (
       <iframe frameborder="0"
-          scrolling="no"
+          scrolling="yes"
           id={"chat_embed_" + this.props.index}
           src={"https://www.twitch.tv/embed/" + this.props.nick + "/chat"}
           height="100%"

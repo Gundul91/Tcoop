@@ -13,6 +13,7 @@ class ViewsPage extends Component {
     }
     if(views.length < 2) {
       document.querySelector(".SingleView").style.height = "100%";
+      document.querySelector(".ChatButtons").style.display = "none";
     }
   }
 
@@ -43,11 +44,13 @@ class ViewsPage extends Component {
           }
         </div>
         <div className="Chats">
-          {
-            streamers.map((item, index) =>
-              <button className="chatButton" onClick={this.chatClick.bind(this, index)} >{item}</button>
-            )
-          }
+          <div className="ChatButtons">
+            {
+              streamers.map((item, index) =>
+                <button className="ChatButton" onClick={this.chatClick.bind(this, index)} >{item}</button>
+              )
+            }
+          </div>
           {
             streamers.map((item, index) =>
               <Chat
