@@ -10,18 +10,22 @@ class Home extends Component {
   info_user = {}
 
   addToList() {
-    let url = "https://api.twitch.tv/helix/streams?user_login=buonco_rock";
-    //let url = "https://api.twitch.tv/helix/streams?user_id=" + this.info_user.id;
+    // per test
+    let testValue = document.getElementById('txtUser').value;
+    if(testValue)
+      this.info_user.login = testValue
+    let url = "https://api.twitch.tv/helix/streams?user_login=" + this.info_user.login;
     fetch(url, {
       headers: {
         'Client-ID': "upk8rrcojp2raiw9pd2edhi0bvhze5"
       }
     })
     .then(function(c) {
+    console.log(c)
       return c.json()
     }).then(function(j) {
       console.log(j)
-      if(j.data.length == 0)
+      if(j.data.length === 0)
       {
         console.log("non è live")
       } else {
@@ -37,13 +41,12 @@ class Home extends Component {
           console.log("è live su " + k.data[0].name)
 
           // Aggiunge queste informazione al DB nella collection "user"
-          this.db.collection("user").add({
+          this.db.collection("user").doc(this.info_user.login).set({
               img_url: k.data[0].box_art_url,
               game_name: k.data[0].name,
               language: j.data[0].language,
               user_image: j.data[0].thumbnail_url,
-              stream_title: j.data[0].title,
-              name: "buonco_rock"
+              stream_title: j.data[0].title
           })
           .then(function(docRef) {
               console.log("Document written with ID: ", docRef.id);
@@ -63,6 +66,36 @@ class Home extends Component {
             console.log(doc.id, doc.data());
         });
     });
+  }
+
+  updateDB() {
+    var washingtonRef = this.db.collection("user").doc("jB41qkZsJZWQvWcXoRbx");
+
+    // Set the "capital" field of the city 'DC'
+    return washingtonRef.update({
+        name: null
+    })
+    .then(function() {
+        console.log("Document successfully updated!");
+    })
+    .catch(function(error) {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
+    });
+  }
+
+  deleteDB() {
+    this.db.collection('user').doc('sodapoppin').delete();
+
+    // Remove the 'capital' field from the document
+    /*var removeCapital = cityRef.update({
+      img_url: firebase.firestore.FieldValue.delete(),
+      game_name: firebase.firestore.FieldValue.delete(),
+      language: firebase.firestore.FieldValue.delete(),
+      user_image: firebase.firestore.FieldValue.delete(),
+      stream_title: firebase.firestore.FieldValue.delete(),
+      name: firebase.firestore.FieldValue.delete()
+    });*/
   }
 
   componentDidMount () {
@@ -113,7 +146,13 @@ class Home extends Component {
         <br/>
         <button className="AddButton" onClick={this.addToList.bind(this)} >Aggiungiti alla lista</button>
         <br/>
+        <input type="text" id="txtUser" placeholder="inserire username per test" ></input>
+        <br/>
         <button className="StampaButton" onClick={this.stampaDB.bind(this)} >Stampa DB</button>
+        <br/>
+        <button className="UpdateButton" onClick={this.updateDB.bind(this)} >Update DB</button>
+        <br/>
+        <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Delete DB</button>
       </div>
     );
   }
