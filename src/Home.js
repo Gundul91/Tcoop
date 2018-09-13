@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import queryString from 'query-string';
+import Streaming from './Streaming.js'
 
 
 const firebase = require("firebase");
@@ -7,6 +8,10 @@ const firebase = require("firebase");
 require("firebase/firestore");
 
 class Home extends Component {
+  state = {
+    lista: {}
+  }
+
   info_user = {}
 
   addToList() {
@@ -98,7 +103,38 @@ class Home extends Component {
     });*/
   }
 
-  componentDidMount () {
+  showDB() {
+    this.show = true;
+    let obj = {};
+    this.db.collection("user").get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+          obj[doc.id] = doc.data();
+      });
+      this.setState({lista: obj});
+    })
+  }
+
+  // Restituisce la lista di elementi <Streaming> contenenti le info di chi cerca coop
+
+  getList() {
+    if(this.show)
+    {
+      let objs = [];
+      for (var key in this.state.lista) {
+        let item = this.state.lista[key];
+        objs.push(<Streaming
+          game_name={item.game_name}
+          img_url={item.img_url}
+          language={item.language}
+          stream_title={item.stream_title}
+          user_image={item.user_image}
+        />);
+      }
+      return objs;
+    }
+  }
+
+  componentDidMount() {
     if(this.tmp.access_token !== undefined)
     {
       let auth = "Bearer " +  this.tmp.access_token
@@ -153,6 +189,13 @@ class Home extends Component {
         <button className="UpdateButton" onClick={this.updateDB.bind(this)} >Update DB</button>
         <br/>
         <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Delete DB</button>
+        <br/>
+        <button className="ShowButton" onClick={this.showDB.bind(this)} >Show streamer list</button>
+        <div className="listaStreaming">
+          {
+            this.getList()
+          }
+        </div>
       </div>
     );
   }
