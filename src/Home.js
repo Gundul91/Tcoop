@@ -47,10 +47,10 @@ class Home extends Component {
 
           // Aggiunge queste informazione al DB nella collection "user"
           this.db.collection("user").doc(this.info_user.login).set({
-              img_url: k.data[0].box_art_url,
+              img_url: j.data[0].thumbnail_url,
               game_name: k.data[0].name,
               language: j.data[0].language,
-              user_image: j.data[0].thumbnail_url,
+              user_image: this.info_user.profile_image_url,
               stream_title: j.data[0].title
           })
           .then(function(docRef) {
@@ -128,6 +128,7 @@ class Home extends Component {
           language={item.language}
           stream_title={item.stream_title}
           user_image={item.user_image}
+          streamer_name={key}
         />);
       }
       return objs;

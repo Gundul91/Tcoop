@@ -64,3 +64,47 @@
 .tw-pd-1 {
   top: 200px;
 }
+
+.Streaming {
+  display: inline-block;
+  border: solid 1px red;
+  width: 35%;
+}
+
+.streamingImg {
+  width: 100%;
+}
+
+.streamerImg {
+  width: 50px;
+  display: inline-block;
+}
+
+.streamingInfo {
+  display: inline-block;
+  font-size: 0.9em;
+}
+
+.streamingTitle,
+.streamerName,
+.streamingGame
+ {
+  margin: 2px;
+}
+
+.streamingTitle {
+
+}
+
+.streamerName {
+}
+
+.streamingGame {
+}
+
+.streamingLanguage {
+  position: absolute;
+  right: 0;
+  font: bold;
+  color: white;
+}
