@@ -19,6 +19,8 @@ class Home extends Component {
     let testValue = document.getElementById('txtUser').value;
     if(testValue)
       this.info_user.login = testValue
+
+    // Richiedo info sullo streaming di chi ha fatto l'accesso nel sito
     let url = "https://api.twitch.tv/helix/streams?user_login=" + this.info_user.login;
     fetch(url, {
       headers: {
@@ -26,32 +28,32 @@ class Home extends Component {
       }
     })
     .then(function(c) {
-    console.log(c)
       return c.json()
-    }).then(function(j) {
-      console.log(j)
-      if(j.data.length === 0)
+    }).then(function(str_info) {
+      console.log(str_info)
+      if(str_info.data.length === 0)
       {
         console.log("non è live")
       } else {
-        fetch("https://api.twitch.tv/helix/games?id=" + j.data[0].game_id, {
+        // Richiedo info sul gioco con l'id ricevuto dalla precedente richiesta
+        fetch("https://api.twitch.tv/helix/games?id=" + str_info.data[0].game_id, {
           headers: {
             'Client-ID': "upk8rrcojp2raiw9pd2edhi0bvhze5"
           }
         })
         .then(function(c) {
           return c.json()
-        }).then(function(k) {
-          console.log(k)
-          console.log("è live su " + k.data[0].name)
+        }).then(function(game_info) {
+          console.log(game_info)
+          console.log("è live su " + game_info.data[0].name)
 
           // Aggiunge queste informazione al DB nella collection "user"
           this.db.collection("user").doc(this.info_user.login).set({
-              img_url: j.data[0].thumbnail_url,
-              game_name: k.data[0].name,
-              language: j.data[0].language,
+              img_url: str_info.data[0].thumbnail_url,
+              game_name: game_info.data[0].name,
+              language: str_info.data[0].language,
               user_image: this.info_user.profile_image_url,
-              stream_title: j.data[0].title
+              stream_title: str_info.data[0].title
           })
           .then(function(docRef) {
               console.log("Document written with ID: ", docRef.id);
@@ -90,7 +92,12 @@ class Home extends Component {
   }
 
   deleteDB() {
-    this.db.collection('user').doc('sodapoppin').delete();
+    // per test
+    let testValue = document.getElementById('txtUser').value;
+    if(testValue)
+      this.info_user.login = testValue
+
+    this.db.collection('user').doc(this.info_user.login).delete();
 
     // Remove the 'capital' field from the document
     /*var removeCapital = cityRef.update({
@@ -115,7 +122,6 @@ class Home extends Component {
   }
 
   // Restituisce la lista di elementi <Streaming> contenenti le info di chi cerca coop
-
   getList() {
     if(this.show)
     {
@@ -135,10 +141,12 @@ class Home extends Component {
     }
   }
 
+  // Richiede i dati di chi accede e inizializza il collegamento con il db di firebase
   componentDidMount() {
-    if(this.tmp.access_token !== undefined)
+    // Se è stato fatto l'accesso con twitch richiedo i dati dell'utente
+    if(this.access_info.access_token !== undefined)
     {
-      let auth = "Bearer " +  this.tmp.access_token
+      let auth = "Bearer " +  this.access_info.access_token
       fetch("https://api.twitch.tv/helix/users", {
         headers: {
           'Authorization': auth
@@ -146,8 +154,8 @@ class Home extends Component {
       })
       .then(function(c) {
         return c.json()
-      }).then(function(j) {
-        this.info_user = j.data[0];
+      }).then(function(user) {
+        this.info_user = user.data[0];
         console.log(this.info_user)
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
         console.log('e', err);
@@ -175,8 +183,7 @@ class Home extends Component {
   }
 
   render() {
-    this.markers = []
-    this.tmp = queryString.parse(this.props.location.hash)
+    this.access_info = queryString.parse(this.props.location.hash)
     return (
       <div className="Home">
         <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
@@ -189,7 +196,7 @@ class Home extends Component {
         <br/>
         <button className="UpdateButton" onClick={this.updateDB.bind(this)} >Update DB</button>
         <br/>
-        <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Delete DB</button>
+        <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
         <br/>
         <button className="ShowButton" onClick={this.showDB.bind(this)} >Show streamer list</button>
         <div className="listaStreaming">

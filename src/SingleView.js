@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
 class SingleView extends Component {
-  state = {
-
-  }
-
   avvia (){
     var options = {
       width: "100%",

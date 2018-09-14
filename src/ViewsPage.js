@@ -5,21 +5,29 @@ import { Link } from 'react-router-dom'
 
 class ViewsPage extends Component {
   componentDidMount () {
+    // Adatto le dimenzioni delle views e delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
+    let chatButtons = document.querySelectorAll(".ChatButton");
     if(views.length < 3) {
+      chatButtons.forEach((element) => element.style.height = "100%");
       views.forEach((element) => element.style.width = "100%");
     } else {
-      views.forEach((element) => element.style.width = "calc(100% * (1/2))");
+      views.forEach((element) => element.style.width = "50%");
     }
     if(views.length < 2) {
       document.querySelector(".SingleView").style.height = "100%";
       document.querySelector(".ChatButtons").style.display = "none";
+    } else if(views.length > 4)
+    {
+      views.forEach((element) => element.style.height = "calc( 100% * 1/3 )");
+      chatButtons.forEach((element) => element.style.width = "calc( 100% * 1/3 )");
     }
   }
 
+  // show the selected chat and hide the other
   chatClick(index) {
-    console.log(index)
-    for(let i=0; i<3; i++)
+    let chats = document.querySelectorAll(".single_chat");
+    for(let i=0; i<chats.length; i++)
     {
       document.getElementById('chat_embed_' + i).style.display = index === i ? "block" : "none"
     }
@@ -30,7 +38,9 @@ class ViewsPage extends Component {
     let streamers = this.props.location.pathname.split("/")
     streamers.shift()
 
-    // scorre l'arrey di nomi e aggiunge un "SingleView" ciascuno
+    /* Scorre l'arrey di streamer e aggiunge un "SingleView" ciascuno
+     * Aggiunto anche un bottone ed una chat per ogni streamer
+     */
     return (
       <div className="ViewsPage">
         <div className="VideosContainer">
@@ -47,7 +57,10 @@ class ViewsPage extends Component {
           <div className="ChatButtons">
             {
               streamers.map((item, index) =>
-                <button className="ChatButton" onClick={this.chatClick.bind(this, index)} >{item}</button>
+                <button
+                  className="ChatButton"
+                  onClick={this.chatClick.bind(this, index)}
+                >{item}</button>
               )
             }
           </div>

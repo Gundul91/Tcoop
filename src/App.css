@@ -8,62 +8,7 @@
   box-sizing: border-box;
 }
 
-.VideosContainer {
-  display: inline-flex;
-  flex-wrap: wrap;
-  width: 76%;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-  float: left;
-  overflow: hidden;
-}
-
-.Chats {
-  border: solid grey 1px;
-  display: inline-block;
-  width: 24%;
-  overflow: auto;
-}
-
-.SingleView {
-  width: 50%;
-  padding: 0;
-  margin: 0;
-  height: 50%;
-}
-
-.Chats > iframe {
-  display: table-cell;
-  height: calc(100vh - 46px);
-}
-
-#chat_embed_1,
-#chat_embed_2 {
-  display: none;
-}
-
-.SingleView > div {
-  height: 100%;
-}
-
-.ChatButtons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  height: 40px;
-}
-
-.ChatButton {
-  display: inline-block;
-  border: solid grey 1px;
-  width: 50%;
-}
-
-.tw-pd-1 {
-  top: 200px;
-}
+/* ----- HOME ----- */
 
 .Streaming {
   display: inline-block;
@@ -79,19 +24,26 @@
 .streamerImg {
   width: 50px;
   display: inline-block;
+  margin: 0 5px;
 }
 
 .streamingInfo {
   display: inline-block;
   font-size: 0.9em;
-  max-width: calc( 100% - 50px);
+  max-width: calc( 100% - 60px);
+  margin-bottom: 5px;
 }
 
 .streamingTitle,
 .streamerName,
 .streamingGame
- {
+{
   margin: 2px;
+}
+
+.streamingTitle,
+.streamingGame {
+  cursor: pointer;
 }
 
 .streamingTitle {
@@ -118,4 +70,70 @@
   top: 15px;
   font-weight: 900;
   color: white;
+}
+
+/* ----- VIEWSPAGE ----- */
+
+.VideosContainer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  width: 76%;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  float: left;
+  overflow: hidden;
+}
+
+.SingleView {
+  width: 50%;
+  padding: 0;
+  margin: 0;
+  height: 50%;
+}
+
+.SingleView > div {
+  height: 100%;
+}
+
+/* ----- CHATS ----- */
+
+.Chats {
+  border: solid grey 1px;
+  display: inline-block;
+  width: 24%;
+  overflow: auto;
+}
+
+.Chats > iframe {
+  display: table-cell;
+  height: calc(100vh - 46px);
+}
+
+#chat_embed_1,
+#chat_embed_2,
+#chat_embed_3,
+#chat_embed_4,
+#chat_embed_5 {
+  display: none;
+}
+
+.tw-pd-1 {
+  top: 200px;
+}
+
+/* ----- CHATBUTTONS ----- */
+
+.ChatButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  height: 40px;
+}
+
+.ChatButton {
+  display: inline-block;
+  border: solid grey 1px;
+  width: 50%;
 }

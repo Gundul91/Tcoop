@@ -1,11 +1,6 @@
 import React, { Component } from 'react';
 
 class Streaming extends Component {
-
-  componentDidMount () {
-
-  }
-
   render() {
     return (
       <div className="Streaming">
@@ -14,7 +9,7 @@ class Streaming extends Component {
         <br/>
         <img className="streamerImg" src={this.props.user_image}/>
         <div className="streamingInfo">
-          <div className="streamingTitle">{this.props.stream_title}</div>
+          <div className="streamingTitle" title={this.props.stream_title}>{this.props.stream_title}</div>
           <p className="streamerName">{this.props.streamer_name}</p>
           <p className="streamingGame">{this.props.game_name}</p>
         </div>
