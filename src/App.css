@@ -30,19 +30,18 @@
 .streamingInfo {
   display: inline-block;
   font-size: 0.9em;
-  max-width: calc( 100% - 60px);
+  max-width: calc(100% - 60px);
   margin-bottom: 5px;
 }
 
 .streamingTitle,
 .streamerName,
-.streamingGame
-{
+.streamingGame {
   margin: 2px;
 }
 
 .streamingTitle,
-.streamingGame {
+.streamingGame{
   cursor: pointer;
 }
 
@@ -74,6 +73,10 @@
 
 /* ----- VIEWSPAGE ----- */
 
+.ViewsPage {
+  height: 100vh;
+}
+
 .VideosContainer {
   display: inline-flex;
   flex-wrap: wrap;
@@ -89,7 +92,7 @@
   width: 50%;
   padding: 0;
   margin: 0;
-  height: 50%;
+  height: calc(100% / 3);
 }
 
 .SingleView > div {
@@ -99,6 +102,7 @@
 /* ----- CHATS ----- */
 
 .Chats {
+  height: calc(100vh - 3px); // Non so perchè sia necessario togliere 3px
   border: solid grey 1px;
   display: inline-block;
   width: 24%;
@@ -135,5 +139,6 @@
 .ChatButton {
   display: inline-block;
   border: solid grey 1px;
-  width: 50%;
+  width: calc(100% / 3);
+  height: 50%;
 }

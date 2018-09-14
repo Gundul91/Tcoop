@@ -8,19 +8,36 @@ class ViewsPage extends Component {
     // Adatto le dimenzioni delle views e delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
     let chatButtons = document.querySelectorAll(".ChatButton");
-    if(views.length < 3) {
-      chatButtons.forEach((element) => element.style.height = "100%");
-      views.forEach((element) => element.style.width = "100%");
-    } else {
-      views.forEach((element) => element.style.width = "50%");
-    }
-    if(views.length < 2) {
-      document.querySelector(".SingleView").style.height = "100%";
-      document.querySelector(".ChatButtons").style.display = "none";
-    } else if(views.length > 4)
-    {
-      views.forEach((element) => element.style.height = "calc( 100% * 1/3 )");
-      chatButtons.forEach((element) => element.style.width = "calc( 100% * 1/3 )");
+    switch(views.length) {
+      case 1:
+        document.querySelector(".ChatButtons").style.display = "none";
+        document.querySelector(".single_chat").style.height = "100%";
+        views.forEach((element) =>
+        {
+          element.style.height = "100%";
+          element.style.width = "100%";
+        });
+        break;
+      case 2:
+        chatButtons.forEach((element) =>
+        {
+          element.style.height = "100%";
+          element.style.width = "50%";
+        });
+        views.forEach((element) =>
+        {
+          element.style.height = "50%";
+          element.style.width = "100%";
+        });
+        break;
+      case 3:
+        chatButtons.forEach((element) => element.style.width = "50%");
+        views.forEach((element) => element.style.width = "100%");
+        break;
+      case 4:
+        chatButtons.forEach((element) => element.style.width = "50%");
+        views.forEach((element) => element.style.height = "50%");
+        break;
     }
   }
 
