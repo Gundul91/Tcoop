@@ -69,6 +69,7 @@
   display: inline-block;
   border: solid 1px red;
   width: 35%;
+  position: relative;
 }
 
 .streamingImg {
@@ -83,6 +84,7 @@
 .streamingInfo {
   display: inline-block;
   font-size: 0.9em;
+  max-width: calc( 100% - 50px);
 }
 
 .streamingTitle,
@@ -93,18 +95,27 @@
 }
 
 .streamingTitle {
-
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: bold 1.2em Arial;
 }
 
 .streamerName {
+  color: #2d2c2c;
 }
 
 .streamingGame {
+  color: #2d2c2c;
 }
 
 .streamingLanguage {
   position: absolute;
-  right: 0;
-  font: bold;
+  text-transform: uppercase;
+  margin: 0;
+  right: 15px;
+  top: 15px;
+  font-weight: 900;
   color: white;
 }
