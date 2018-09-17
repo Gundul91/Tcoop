@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import queryString from 'query-string';
 import Streaming from './Streaming.js'
+import TopBar from './TopBar.js'
 
 
 const firebase = require("firebase");
@@ -110,8 +111,8 @@ class Home extends Component {
     });*/
   }
 
+  // Richiede la lista al DB e la mette in this.state.lista
   showDB() {
-    this.show = true;
     let obj = {};
     this.db.collection("user").get().then((querySnapshot) => {
       querySnapshot.forEach((doc) => {
@@ -123,25 +124,45 @@ class Home extends Component {
 
   // Restituisce la lista di elementi <Streaming> contenenti le info di chi cerca coop
   getList() {
-    if(this.show)
-    {
-      let objs = [];
-      for (var key in this.state.lista) {
-        let item = this.state.lista[key];
-        objs.push(<Streaming
-          game_name={item.game_name}
-          img_url={item.img_url}
-          language={item.language}
-          stream_title={item.stream_title}
-          user_image={item.user_image}
-          streamer_name={key}
-        />);
-      }
-      return objs;
+    let objs = [];
+    for (var key in this.state.lista) {
+      let item = this.state.lista[key];
+      objs.push(<Streaming
+        game_name={item.game_name}
+        img_url={item.img_url}
+        language={item.language}
+        stream_title={item.stream_title}
+        user_image={item.user_image}
+        streamer_name={key}
+      />);
     }
+    return objs;
   }
 
-  // Richiede i dati di chi accede e inizializza il collegamento con il db di firebase
+  // Inizializza il collegamento con il db di firebase
+  componentWillMount() {
+    // Settings per firebase
+    firebase.initializeApp({
+      apiKey: "AIzaSyCaQYYVlMGO7ha0g31l6iYPLxj8pNb9c0o",
+      authDomain: "tcoop-6668f.firebaseapp.com",
+      databaseURL: "https://tcoop-6668f.firebaseio.com",
+      projectId: "tcoop-6668f",
+      storageBucket: "tcoop-6668f.appspot.com",
+      messagingSenderId: "429000425300"
+    });
+
+    // Initialize Cloud Firestore through Firebase
+    this.db = firebase.firestore();
+
+    // Disable deprecated features
+    this.db.settings({
+      timestampsInSnapshots: true
+    });
+
+    this.showDB();
+  }
+
+  // Richiede i dati di chi accede
   componentDidMount() {
     // Se è stato fatto l'accesso con twitch richiedo i dati dell'utente
     if(this.access_info.access_token !== undefined)
@@ -161,44 +182,28 @@ class Home extends Component {
         console.log('e', err);
       });
     }
-
-    // Settings per firebase
-    firebase.initializeApp({
-      apiKey: "AIzaSyCaQYYVlMGO7ha0g31l6iYPLxj8pNb9c0o",
-      authDomain: "tcoop-6668f.firebaseapp.com",
-      databaseURL: "https://tcoop-6668f.firebaseio.com",
-      projectId: "tcoop-6668f",
-      storageBucket: "tcoop-6668f.appspot.com",
-      messagingSenderId: "429000425300"
-    });
-
-    // Initialize Cloud Firestore through Firebase
-    this.db = firebase.firestore();
-
-    // Disable deprecated features
-    this.db.settings({
-      timestampsInSnapshots: true
-    });
-
   }
 
   render() {
     this.access_info = queryString.parse(this.props.location.hash)
     return (
       <div className="Home">
-        <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
-        <br/>
-        <button className="AddButton" onClick={this.addToList.bind(this)} >Aggiungiti alla lista</button>
-        <br/>
-        <input type="text" id="txtUser" placeholder="inserire username per test" ></input>
-        <br/>
-        <button className="StampaButton" onClick={this.stampaDB.bind(this)} >Stampa DB</button>
-        <br/>
-        <button className="UpdateButton" onClick={this.updateDB.bind(this)} >Update DB</button>
-        <br/>
-        <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
-        <br/>
-        <button className="ShowButton" onClick={this.showDB.bind(this)} >Show streamer list</button>
+        <div className="boxTest">
+          <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
+          <br/>
+          <button className="AddButton" onClick={this.addToList.bind(this)} >Aggiungiti alla lista</button>
+          <br/>
+          <input type="text" id="txtUser" placeholder="inserire username per test" ></input>
+          <br/>
+          <button className="StampaButton" onClick={this.stampaDB.bind(this)} >Stampa DB</button>
+          <br/>
+          <button className="UpdateButton" onClick={this.updateDB.bind(this)} >Update DB</button>
+          <br/>
+          <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
+          <br/>
+          <button className="ShowButton" onClick={this.showDB.bind(this)} >Show streamer list</button>
+        </div>
+        <TopBar/>
         <div className="listaStreaming">
           {
             this.getList()
