@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import queryString from 'query-string';
 import Streaming from './Streaming.js'
 import TopBar from './TopBar.js'
+import InputAdd from './InputAdd.js'
 
 
 const firebase = require("firebase");
@@ -47,26 +48,39 @@ class Home extends Component {
         }).then(function(game_info) {
           console.log(game_info)
           console.log("è live su " + game_info.data[0].name)
-
-          // Aggiunge queste informazione al DB nella collection "user"
-          this.db.collection("user").doc(this.info_user.login).set({
-            img_url: str_info.data[0].thumbnail_url,
-            game_name: game_info.data[0].name,
-            language: str_info.data[0].language,
-            user_image: this.info_user.profile_image_url,
-            stream_title: str_info.data[0].title
-          })
-          .then(function(docRef) {
-            document.querySelector(".AddButton").style.display = "none";
-            document.querySelector(".DeleteButton").style.display = "inline-block";
-            console.log("Document written with ID: ", docRef.id);
-          })
-          .catch(function(error) {
-            console.error("Error adding document: ", error);
-          });
+          this.str_info = str_info;
+          this.game_info = game_info;
+          document.querySelector(".InputAdd").style.display = "block";
         }.bind(this))
       }
     }.bind(this))
+  }
+
+  addToBD() {
+    // Aggiunge queste informazione al DB nella collection "user"
+    if(document.getElementById('txtTitle').value !== '')
+      this.str_info.data[0].title = document.getElementById('txtTitle').value;
+
+
+    //Da midificare la if e aggiungere il numero di persone cercate
+
+
+    this.db.collection("user").doc(this.info_user.login).set({
+      img_url: this.str_info.data[0].thumbnail_url,
+      game_name: this.game_info.data[0].name,
+      language: this.str_info.data[0].language,
+      user_image: this.info_user.profile_image_url,
+      stream_title: this.str_info.data[0].title
+    })
+    .then(function(docRef) {
+      document.querySelector(".AddButton").style.display = "none";
+      document.querySelector(".DeleteButton").style.display = "inline-block";
+      console.log("Document written with ID: ", docRef.id);
+      document.querySelector(".InputAdd").style.display = "none";
+    })
+    .catch(function(error) {
+      console.error("Error adding document: ", error);
+    });
   }
 
   // Richiamata dal click sul bottone "Stampa DB" stampa il contenuto del DB
@@ -187,6 +201,7 @@ class Home extends Component {
     this.access_info = queryString.parse(this.props.location.hash)
     return (
       <div className="Home">
+        <InputAdd addToBD={this.addToBD.bind(this)}/>
         <div className="boxTest">
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
           <br/>
