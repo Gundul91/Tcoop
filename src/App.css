@@ -33,6 +33,14 @@
   line-height: 40px;
 }
 
+.userImage {
+  height: 35px;
+}
+
+.DeleteButton {
+  display: none;
+}
+
 /* ----- HOME ----- */
 
 .Streaming {

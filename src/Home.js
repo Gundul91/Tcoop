@@ -50,17 +50,19 @@ class Home extends Component {
 
           // Aggiunge queste informazione al DB nella collection "user"
           this.db.collection("user").doc(this.info_user.login).set({
-              img_url: str_info.data[0].thumbnail_url,
-              game_name: game_info.data[0].name,
-              language: str_info.data[0].language,
-              user_image: this.info_user.profile_image_url,
-              stream_title: str_info.data[0].title
+            img_url: str_info.data[0].thumbnail_url,
+            game_name: game_info.data[0].name,
+            language: str_info.data[0].language,
+            user_image: this.info_user.profile_image_url,
+            stream_title: str_info.data[0].title
           })
           .then(function(docRef) {
-              console.log("Document written with ID: ", docRef.id);
+            document.querySelector(".AddButton").style.display = "none";
+            document.querySelector(".DeleteButton").style.display = "inline-block";
+            console.log("Document written with ID: ", docRef.id);
           })
           .catch(function(error) {
-              console.error("Error adding document: ", error);
+            console.error("Error adding document: ", error);
           });
         }.bind(this))
       }
@@ -92,23 +94,20 @@ class Home extends Component {
     });
   }
 
+  // Event cambio testo nel textboxdi testo
+  onChange() {
+    this.info_user.login = document.getElementById('txtUser').value;
+    if(this.state.lista[this.info_user.login])
+    {
+      document.querySelector(".AddButton").style.display = "none";
+      document.querySelector(".DeleteButton").style.display = "inline-block";
+    }
+  }
+
   deleteDB() {
-    // per test
-    let testValue = document.getElementById('txtUser').value;
-    if(testValue)
-      this.info_user.login = testValue
-
     this.db.collection('user').doc(this.info_user.login).delete();
-
-    // Remove the 'capital' field from the document
-    /*var removeCapital = cityRef.update({
-      img_url: firebase.firestore.FieldValue.delete(),
-      game_name: firebase.firestore.FieldValue.delete(),
-      language: firebase.firestore.FieldValue.delete(),
-      user_image: firebase.firestore.FieldValue.delete(),
-      stream_title: firebase.firestore.FieldValue.delete(),
-      name: firebase.firestore.FieldValue.delete()
-    });*/
+    document.querySelector(".AddButton").style.display = "inline-block";
+    document.querySelector(".DeleteButton").style.display = "none";
   }
 
   // Richiede la lista al DB e la mette in this.state.lista
@@ -191,19 +190,19 @@ class Home extends Component {
         <div className="boxTest">
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
           <br/>
-          <button className="AddButton" onClick={this.addToList.bind(this)} >Aggiungiti alla lista</button>
+          <button className="AddButtonTest" onClick={this.addToList.bind(this)} >Aggiungiti alla lista</button>
           <br/>
-          <input type="text" id="txtUser" placeholder="inserire username per test" ></input>
+          <input type="text" id="txtUser" placeholder="inserire username per test" onChange={this.onChange.bind(this)}></input>
           <br/>
           <button className="StampaButton" onClick={this.stampaDB.bind(this)} >Stampa DB</button>
           <br/>
-          <button className="UpdateButton" onClick={this.updateDB.bind(this)} >Update DB</button>
+          <button className="UpdateButtonTest" onClick={this.updateDB.bind(this)} >Update DB</button>
           <br/>
-          <button className="DeleteButton" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
+          <button className="DeleteButtonTest" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
           <br/>
-          <button className="ShowButton" onClick={this.showDB.bind(this)} >Show streamer list</button>
+          <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
-        <TopBar/>
+        <TopBar info_user={this.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} userInList={this.state.lista[this.info_user.login]}/>
         <div className="listaStreaming">
           {
             this.getList()
