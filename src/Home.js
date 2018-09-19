@@ -70,13 +70,15 @@ class Home extends Component {
       game_name: this.game_info.data[0].name,
       language: this.str_info.data[0].language,
       user_image: this.info_user.profile_image_url,
-      stream_title: this.str_info.data[0].title
+      stream_title: this.str_info.data[0].title,
+      presenti: document.querySelector(".presenti").value,
+      necessari: document.querySelector(".necessari").value
     })
     .then(function(docRef) {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
-      console.log("Document written with ID: ", docRef.id);
       document.querySelector(".InputAdd").style.display = "none";
+      console.log("Document written with ID: ", docRef.id);
     })
     .catch(function(error) {
       console.error("Error adding document: ", error);
@@ -147,6 +149,8 @@ class Home extends Component {
         stream_title={item.stream_title}
         user_image={item.user_image}
         streamer_name={key}
+        presenti={item.presenti}
+        necessari={item.necessari}
       />);
     }
     return objs;

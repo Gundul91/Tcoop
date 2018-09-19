@@ -119,6 +119,15 @@
   color: white;
 }
 
+.streamingQuantity {
+  position: absolute;
+  margin: 0;
+  left: 15px;
+  top: 15px;
+  font-weight: 900;
+  color: white;
+}
+
 /* ----- VIEWSPAGE ----- */
 
 .ViewsPage {
