@@ -78,7 +78,6 @@ class Home extends Component {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
       document.querySelector(".InputAdd").style.display = "none";
-      console.log("Document written with ID: ", docRef.id);
     })
     .catch(function(error) {
       console.error("Error adding document: ", error);
@@ -117,6 +116,9 @@ class Home extends Component {
     {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
+    } else {
+      document.querySelector(".AddButton").style.display = "inline-block";
+      document.querySelector(".DeleteButton").style.display = "none";
     }
   }
 

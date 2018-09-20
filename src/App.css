@@ -128,6 +128,14 @@
   color: white;
 }
 
+#presenti {
+  color: rgb(237, 217, 34);
+}
+
+#necessari {
+  color: rgb(223, 66, 17);
+}
+
 /* ----- VIEWSPAGE ----- */
 
 .ViewsPage {
