@@ -3,6 +3,7 @@ import queryString from 'query-string';
 import Streaming from './Streaming.js'
 import TopBar from './TopBar.js'
 import InputAdd from './InputAdd.js'
+import Whisper from './Whisper.js'
 
 
 const firebase = require("firebase");
@@ -201,6 +202,29 @@ class Home extends Component {
         console.log('e', err);
       });
     }
+    console.log("va");
+    this.db.collection("user").doc("dakotaz")
+    .onSnapshot(function(doc) {
+        console.log("Update: ", doc.data());
+    });
+    console.log("va2");
+  }
+
+  /* WHISPER */
+
+  sendMessage() {
+    let utente = document.getElementById('txtRicevente').value;
+    let messaggio = document.getElementById('txtMessage').value;
+
+    // CAPIRE COME IMPOSTARE IL DB PER LA CHAT
+
+    this.db.collection("chat").doc(utente).collection(this.info_user.login).doc("prova").set({
+      inviante: this.info_user.login,
+      messaggio: messaggio
+    })
+    .catch(function(error) {
+      console.error("Error adding document: ", error);
+    });
   }
 
   render() {
@@ -223,6 +247,7 @@ class Home extends Component {
           <br/>
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
+        <Whisper sendMessage={this.sendMessage.bind(this)}/>
         <TopBar info_user={this.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} userInList={this.state.lista[this.info_user.login]}/>
         <div className="listaStreaming">
           {
