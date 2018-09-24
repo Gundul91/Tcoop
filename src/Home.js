@@ -225,22 +225,26 @@ class Home extends Component {
   /* WHISPER */
 
   sendMessage() {
-    let utente = document.getElementById('txtRicevente').value;
+    let utente = document.getElementById('txtRicevente').value.toLowerCase();
     let messaggio = document.getElementById('txtMessage').value;
 
-    // FARE TUTTO LOWERCASE PERCHè ALTRIMENTI C'è DIFFERENZA FRA Gundul91 e gundul91
     this.contatore ++;
     let stringa = this.info_user.login > utente ? "chat_" + utente + "_" + this.info_user.login : "chat_" + this.info_user.login + "_" + utente;
 
     // Elemento su cui mettere listener
+    let d = new Date();
     this.db.collection("chat").doc(utente + "_last_chat").set({
-      stringa: stringa
+      stringa: stringa,
+      messaggio: messaggio,
+      utente: this.info_user.display_name,
+      contatore: this.contatore
     });
 
     // Aggiungo al DB il messaggio
+    // DA CAMBIARE, OGNI VOLTA CHE RICARICO LA PAGINA IL CONTATORE TORNA A 0 E SOVRASCRIVE I MESSAGGI
     this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc("messaggio" + this.contatore).set({
       mess: messaggio,
-      users: this.info_user.login
+      users: this.info_user.display_name
     })
     .catch(function(error) {
       console.error("Error adding document: ", error);

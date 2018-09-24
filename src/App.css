@@ -23,7 +23,7 @@
 /* ----- WHISPER ----- */
 
 .Whisper {
-  position: absolute;
+  position: fixed;
   border: solid red 1px;
   background-color: rgb(153, 165, 209);
   width: 200px;
