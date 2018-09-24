@@ -121,6 +121,8 @@ class Home extends Component {
       document.querySelector(".AddButton").style.display = "inline-block";
       document.querySelector(".DeleteButton").style.display = "none";
     }
+
+    this.addLastchatListener();
   }
 
   deleteDB() {
@@ -197,17 +199,27 @@ class Home extends Component {
         return c.json()
       }).then(function(user) {
         this.info_user = user.data[0];
-        console.log(this.info_user)
+        console.log(this.info_user);
+        this.addLastchatListener();
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
         console.log('e', err);
       });
     }
-    console.log("va");
-    this.db.collection("user").doc("dakotaz")
+
+    this.contatore = 0; // Per MESSAGGI
+
+  }
+
+  addLastchatListener() {
+    /* LISTENER SU ELEMENTO DEL DB
+     * Stampa quando cambia l'elemento "login + _last_chat" nel // DB
+     * Aggiungere qui la comparsa della notifica di un nuovo messaggio o di una richiesta di tcoop
+     */
+    console.log("login_listener: " + this.info_user.login);
+    this.db.collection("chat").doc(this.info_user.login + "_last_chat")
     .onSnapshot(function(doc) {
-        console.log("Update: ", doc.data());
+        console.log("Update: ", doc);
     });
-    console.log("va2");
   }
 
   /* WHISPER */
@@ -216,11 +228,19 @@ class Home extends Component {
     let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
 
-    // CAPIRE COME IMPOSTARE IL DB PER LA CHAT
+    // FARE TUTTO LOWERCASE PERCHè ALTRIMENTI C'è DIFFERENZA FRA Gundul91 e gundul91
+    this.contatore ++;
+    let stringa = this.info_user.login > utente ? "chat_" + utente + "_" + this.info_user.login : "chat_" + this.info_user.login + "_" + utente;
 
-    this.db.collection("chat").doc(utente).collection(this.info_user.login).doc("prova").set({
-      inviante: this.info_user.login,
-      messaggio: messaggio
+    // Elemento su cui mettere listener
+    this.db.collection("chat").doc(utente + "_last_chat").set({
+      stringa: stringa
+    });
+
+    // Aggiungo al DB il messaggio
+    this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc("messaggio" + this.contatore).set({
+      mess: messaggio,
+      users: this.info_user.login
     })
     .catch(function(error) {
       console.error("Error adding document: ", error);
@@ -228,7 +248,7 @@ class Home extends Component {
   }
 
   render() {
-    this.access_info = queryString.parse(this.props.location.hash)
+    this.access_info = queryString.parse(this.props.location.hash);
     return (
       <div className="Home">
         <InputAdd addToBD={this.addToBD.bind(this)}/>
