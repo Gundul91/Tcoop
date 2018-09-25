@@ -1,10 +1,16 @@
 import React, { Component } from 'react';
 
-class Whisper extends Component {
+class Whisperers extends Component {
 
   render() {
     return (
-      <div className="Whisper">
+      <div className="Whisperers">
+        <div id="bottoniWhisperers">
+
+        </div>
+        <div id="discussione">
+
+        </div>
         A chi mandare:
         <input type="text" id="txtRicevente" placeholder="Nick ricevente"></input><br/>
         Messaggi:
@@ -16,4 +22,4 @@ class Whisper extends Component {
   }
 }
 
-export default Whisper;
+export default Whisperers;

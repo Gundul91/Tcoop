@@ -22,15 +22,23 @@
 
 /* ----- WHISPER ----- */
 
-.Whisper {
+.Whisperers {
   position: fixed;
   border: solid red 1px;
   background-color: rgb(153, 165, 209);
   width: 200px;
   bottom: 0px;
-  right: 50%;
+  right: 5%;
   z-index: 100;
   padding: 5px;
+}
+
+#discussione {
+  background-color: white;
+}
+
+#discussione > ul {
+  list-style-type: none;
 }
 
 /* ----- TOPBAR ----- */
@@ -153,6 +161,7 @@
 
 .ViewsPage {
   height: 100vh;
+  background-color: black;
 }
 
 .VideosContainer {

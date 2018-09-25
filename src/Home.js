@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import Streaming from './Streaming.js'
 import TopBar from './TopBar.js'
 import InputAdd from './InputAdd.js'
-import Whisper from './Whisper.js'
+import Whisperers from './Whisperers.js'
 
 
 const firebase = require("firebase");
@@ -112,7 +112,8 @@ class Home extends Component {
 
   // Event cambio testo nel textboxdi testo
   onChange() {
-    this.info_user.login = document.getElementById('txtUser').value;
+    this.info_user.display_name = document.getElementById('txtUser').value;
+    this.info_user.login = this.info_user.display_name.toLowerCase();
     if(this.state.lista[this.info_user.login])
     {
       document.querySelector(".AddButton").style.display = "none";
@@ -218,7 +219,31 @@ class Home extends Component {
     console.log("login_listener: " + this.info_user.login);
     this.db.collection("chat").doc(this.info_user.login + "_last_chat")
     .onSnapshot(function(doc) {
-        console.log("Update: ", doc);
+      let messaggio = doc.data();
+      if(messaggio) {
+        if(!document.getElementById("lista_discussione_" + messaggio.utente))
+        {
+          let button = document.createElement("BUTTON");
+          button.innerHTML = messaggio.utente;
+          button.onclick = function() {
+            let chatVarie = document.querySelectorAll("#discussione > ul");
+            console.log(chatVarie);
+            chatVarie.forEach((el) => {
+              el.style.display = "none";
+            });
+            document.getElementById("lista_discussione_" + messaggio.utente).style.display = "block";
+          };
+          document.getElementById("bottoniWhisperers").appendChild(button);
+
+          let ul = document.createElement("UL");
+          ul.id = "lista_discussione_" + messaggio.utente;
+          ul.style.display = "none";
+          document.getElementById('discussione').appendChild(ul);
+        }
+        let li = document.createElement("LI");
+        li.innerHTML = messaggio.utente + ": " + messaggio.messaggio;
+        document.getElementById("lista_discussione_" + messaggio.utente).appendChild(li);
+      }
     });
   }
 
@@ -246,6 +271,17 @@ class Home extends Component {
       mess: messaggio,
       users: this.info_user.display_name
     })
+    .then(() => {
+      if(!document.getElementById("lista_discussione_" + utente))
+      {
+        let ul = document.createElement("UL");
+        ul.id = "lista_discussione_" + utente;
+        document.getElementById('discussione').appendChild(ul);
+      }
+      let li = document.createElement("LI");
+      li.innerHTML = this.info_user.display_name + ": " + messaggio;
+      document.getElementById("lista_discussione_" + utente).appendChild(li);
+    })
     .catch(function(error) {
       console.error("Error adding document: ", error);
     });
@@ -271,7 +307,7 @@ class Home extends Component {
           <br/>
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
-        <Whisper sendMessage={this.sendMessage.bind(this)}/>
+        <Whisperers sendMessage={this.sendMessage.bind(this)}/>
         <TopBar info_user={this.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} userInList={this.state.lista[this.info_user.login]}/>
         <div className="listaStreaming">
           {
