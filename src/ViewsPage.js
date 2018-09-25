@@ -58,11 +58,27 @@ class ViewsPage extends Component {
     } else
     {
       console.log("largo");
+      let calcolo = (Math.floor(res * views.length) + 1);
+      console.log("calcolo", calcolo);
+      console.log("leng", views.length);
       views.forEach((element) =>
       {
-        let calcolo = (Math.floor(res * views.length) + 1);
-        element.style.maxHeight = "calc( 100% / " + calcolo +")";
-        element.style.maxWidth = "calc( 100% * " + (1 / (1 + Math.floor(views.length / calcolo))) +")";
+        let robba = (Math.ceil((1/res) * 2));
+        console.log("vr", robba);
+        if(views.length < robba)
+        {
+          element.style.width = "calc( 100% / " + views.length +")";
+          element.style.height = "100%";
+        } else {
+          while((calcolo - (views.length-calcolo)) >= 2)
+          {
+            calcolo--;
+          }
+          let cos = Math.ceil((views.length / calcolo));
+          console.log("cos", cos);
+          element.style.width = "calc( 100% / " + calcolo +")";
+          element.style.height = "calc( 100% / " + cos +")";
+        }
       });
     }
   }
