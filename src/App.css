@@ -167,7 +167,7 @@
 .VideosContainer {
   display: inline-flex;
   flex-wrap: wrap;
-  width: 76%;
+  width: 74%;
   height: 100vh;
   justify-content: center;
   align-items: center;
@@ -176,10 +176,10 @@
 }
 
 .SingleView {
-  width: 50%;
+  //width: 50%;
   padding: 0;
   margin: 0;
-  height: calc(100% / 3);
+  //height: calc(100% / 3);
 }
 
 .SingleView > div {
@@ -192,13 +192,13 @@
   height: calc(100vh - 3px); // Non so perchè sia necessario togliere 3px
   border: solid grey 1px;
   display: inline-block;
-  width: 24%;
+  width: 26%;
   overflow: auto;
 }
 
 .Chats > iframe {
   display: table-cell;
-  height: calc(100vh - 46px);
+  height: calc(100vh - 56px);
 }
 
 #chat_embed_1,
@@ -220,7 +220,7 @@
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  height: 40px;
+  height: 50px;
 }
 
 .ChatButton {
@@ -228,4 +228,15 @@
   border: solid grey 1px;
   width: calc(100% / 3);
   height: 50%;
+  border-color: rgb(226, 226, 226);
+  color: rgb(226, 226, 226);
+  background-color:inherit;
+  font-weight: bolder;
+  padding: 2px;
+}
+
+/* ----- MEDIA ----- */
+
+@media screen and (min-aspect-ratio: 16/9) {
+  .col { width: 200px; }
 }

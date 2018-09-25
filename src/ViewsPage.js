@@ -8,7 +8,7 @@ class ViewsPage extends Component {
     // Adatto le dimenzioni delle views e delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
     let chatButtons = document.querySelectorAll(".ChatButton");
-    switch(views.length) {
+    /*switch(views.length) {
       case 1:
         document.querySelector(".ChatButtons").style.display = "none";
         document.querySelector(".single_chat").style.height = "100%";
@@ -38,6 +38,32 @@ class ViewsPage extends Component {
         chatButtons.forEach((element) => element.style.width = "50%");
         views.forEach((element) => element.style.height = "50%");
         break;
+    }*/
+    let altezza = document.querySelector(".VideosContainer").offsetHeight;
+    let larghezza = document.querySelector(".VideosContainer").offsetWidth;
+    altezza = altezza / 9;
+    larghezza = larghezza / 16;
+    /*if(altezza > larghezza)
+    {
+      let righe = (altezza/larghezza);
+      console.log("righe: ", righe);
+    } else {
+      let colonne = (larghezza/altezza);
+      console.log("colonne: ", colonne);
+    }*/
+    let res = altezza / larghezza;
+    if(res > 1)
+    {
+      console.log("alto");
+    } else
+    {
+      console.log("largo");
+      views.forEach((element) =>
+      {
+        let calcolo = (Math.floor(res * views.length) + 1);
+        element.style.maxHeight = "calc( 100% / " + calcolo +")";
+        element.style.maxWidth = "calc( 100% * " + (1 / (1 + Math.floor(views.length / calcolo))) +")";
+      });
     }
   }
 
