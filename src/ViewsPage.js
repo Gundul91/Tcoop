@@ -11,7 +11,40 @@ class ViewsPage extends Component {
     let altezza = document.querySelector(".VideosContainer").offsetHeight;
     let larghezza = document.querySelector(".VideosContainer").offsetWidth;
 
-    altezza = altezza / 9;
+    let best = {x: 0, y: 0};
+    let x;
+
+    console.log("altezza: " + altezza + " larghezza: " + larghezza);
+
+    for(let i=1; i<=views.length; i++)
+    {
+      let y = altezza / i;
+      console.log("i: " + i + " x: " + ((y/9)*16)*Math.ceil(views.length / i) + " y: " + y);
+      if(((y/9)*16)*Math.ceil(views.length / i) > larghezza)
+      {
+        x = larghezza / Math.ceil(views.length / i);
+        y = (x/16)*9;
+        console.log("troppo largo x: " + x + " y: " + y);
+      } else {
+        x = (y/9)*16;
+        console.log("giusto x: " + x);
+      }
+      if(y > best.y)
+      {
+        best.x = x;
+        best.y = y;
+      }
+    }
+
+    console.log(best);
+
+    views.forEach((element) =>
+    {
+      element.style.height = best.y + "px";
+      element.style.width = best.x + "px";
+    });
+
+    /*altezza = altezza / 9;
     larghezza = larghezza / 16;
     let res = altezza / larghezza;
 
@@ -25,14 +58,17 @@ class ViewsPage extends Component {
         {
           element.style.height = "calc( 100% / " + views.length +")";
           element.style.width = "100%";
+          console.log("1111111111 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba);
         } else {
-          while((calcolo - (views.length-calcolo)) >= 2)
+          console.log("2222222 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba);
+          while(((views.length/calcolo) - calcolo) >= 2)
           {
-            calcolo--;
+            calcolo++;
           }
           let cos = Math.ceil((views.length / calcolo));
           element.style.width = "calc( 100% / " + cos +")";
           element.style.height = "calc( 100% / " + calcolo +")";
+          console.log("calcolo: " + calcolo + "cos: " + cos );
         }
       });
     } else
@@ -45,7 +81,9 @@ class ViewsPage extends Component {
         {
           element.style.width = "calc( 100% / " + views.length +")";
           element.style.height = "100%";
+          console.log("33333333333 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba );
         } else {
+          console.log("44444444444 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba);
           while((calcolo - (views.length-calcolo)) >= 2)
           {
             calcolo--;
@@ -53,9 +91,10 @@ class ViewsPage extends Component {
           let cos = Math.ceil((views.length / calcolo));
           element.style.width = "calc( 100% / " + calcolo +")";
           element.style.height = "calc( 100% / " + cos +")";
+          console.log("calcolo: " + calcolo + "cos: " + cos );
         }
       });
-    }
+    }*/
   }
 
   buttonsSize() {
