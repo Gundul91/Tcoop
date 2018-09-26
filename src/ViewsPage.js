@@ -4,21 +4,21 @@ import Chat from './Chat.js'
 import { Link } from 'react-router-dom'
 
 class ViewsPage extends Component {
-  componentDidMount () {
+
+  viewsSize() {
     // Adatto le dimenzioni delle views e delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
-    let chatButtons = document.querySelectorAll(".ChatButton");
     let altezza = document.querySelector(".VideosContainer").offsetHeight;
     let larghezza = document.querySelector(".VideosContainer").offsetWidth;
 
     altezza = altezza / 9;
     larghezza = larghezza / 16;
     let res = altezza / larghezza;
-    let calcolo = Math.ceil(views.length / res);
-    let robba = (Math.floor((res) * 2));
 
     if(res > 1)
     {
+      let calcolo = Math.ceil(views.length / res);
+      let robba = (Math.floor((res) * 2));
       views.forEach((element) =>
       {
         if(views.length <= robba)
@@ -37,6 +37,8 @@ class ViewsPage extends Component {
       });
     } else
     {
+      let calcolo = Math.ceil(res * views.length);
+      let robba = (Math.ceil((1/res) * 2));
       views.forEach((element) =>
       {
         if(views.length < robba)
@@ -56,13 +58,39 @@ class ViewsPage extends Component {
     }
   }
 
+  buttonsSize() {
+    let views = document.querySelectorAll(".SingleView");
+    let chatButtons = document.querySelectorAll(".ChatButton");
+    chatButtons.forEach((chatButton) => {
+      if(views.length === 1)
+      {
+        chatButton.style.width = "calc(100% - 12px)";
+      }else if(views.length < 5)
+      {
+        chatButton.style.width = "calc(50% - 8px)";
+      }
+      if(views.length < 3)
+        chatButton.style.height = "calc(100% - 4px)";
+    })
+  }
+
   // show the selected chat and hide the other
-  chatClick(index) {
+  chatClick(index, el) {
     let chats = document.querySelectorAll(".single_chat");
+    document.querySelector(".red").classList.add("blue");
+    document.querySelector(".red").classList.remove("red");
+    el.target.classList.remove("blue");
+    el.target.classList.add("red");
     for(let i=0; i<chats.length; i++)
     {
       document.getElementById('chat_embed_' + i).style.display = index === i ? "block" : "none"
     }
+  }
+
+  componentDidMount () {
+    this.viewsSize();
+    window.addEventListener("resize", this.viewsSize.bind(this));
+    this.buttonsSize();
   }
 
   render() {
@@ -90,7 +118,7 @@ class ViewsPage extends Component {
             {
               streamers.map((item, index) =>
                 <button
-                  className="ChatButton"
+                  className={(!index) ? "ChatButton push_button red" : "ChatButton push_button blue"}
                   onClick={this.chatClick.bind(this, index)}
                 >{item}</button>
               )
