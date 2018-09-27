@@ -98,31 +98,30 @@ class ViewsPage extends Component {
   }
 
   buttonsSize() {
-    let views = document.querySelectorAll(".SingleView");
-    let chatButtons = document.querySelectorAll(".ChatButton");
-    chatButtons.forEach((chatButton) => {
-      if(views.length === 1)
-      {
-        chatButton.style.width = "calc(100% - 12px)";
-      }else if(views.length < 5)
-      {
-        chatButton.style.width = "calc(50% - 8px)";
-      }
-      if(views.length < 3)
-        chatButton.style.height = "calc(100% - 4px)";
-    })
+
   }
 
   // show the selected chat and hide the other
   chatClick(index, el) {
+    console.log(index, document.getElementById('chat_embed_' + index));
     let chats = document.querySelectorAll(".single_chat");
-    document.querySelector(".red").classList.add("blue");
-    document.querySelector(".red").classList.remove("red");
-    el.target.classList.remove("blue");
-    el.target.classList.add("red");
-    for(let i=0; i<chats.length; i++)
+    document.querySelector(".selected_chat").classList.remove("selected_chat");
+    document.getElementById('chat_embed_' + index).classList.add("selected_chat");
+  }
+
+  closeChat(el) {
+    console.log(el.target.innerHTML);
+    if(el.target.innerHTML === "X")
     {
-      document.getElementById('chat_embed_' + i).style.display = index === i ? "block" : "none"
+      el.target.innerHTML = "<";
+      document.querySelector(".Chats").style.display = "none";
+      document.querySelector(".VideosContainer").style.width = "100%";
+      window.dispatchEvent(new Event('resize'));
+    } else {
+      el.target.innerHTML = "X";
+      document.querySelector(".Chats").style.display = "inline-block";
+      document.querySelector(".VideosContainer").style.width = "calc(100% - 341px)";
+      window.dispatchEvent(new Event('resize'));
     }
   }
 
@@ -152,12 +151,13 @@ class ViewsPage extends Component {
             )
           }
         </div>
+        <button className="closeButton" onClick={this.closeChat}>X</button>
         <div className="Chats">
           <div className="ChatButtons">
             {
               streamers.map((item, index) =>
                 <button
-                  className={(!index) ? "ChatButton push_button red" : "ChatButton push_button blue"}
+                  className="ChatButton"
                   onClick={this.chatClick.bind(this, index)}
                 >{item}</button>
               )
@@ -168,6 +168,7 @@ class ViewsPage extends Component {
               <Chat
                 nick={item}
                 index={index}
+                className={(!index) ? "single_chat selected_chat" : "single_chat"}
               />
             )
           }
