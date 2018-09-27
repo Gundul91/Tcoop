@@ -195,16 +195,15 @@
 }
 
 .Chats > iframe {
-  display: table-cell;
   height: calc(100vh - 56px);
 }
 
-#chat_embed_1,
-#chat_embed_2,
-#chat_embed_3,
-#chat_embed_4,
-#chat_embed_5 {
+.single_chat {
   display: none;
+}
+
+#chat_embed_0 {
+  display: block;
 }
 
 .tw-pd-1 {
