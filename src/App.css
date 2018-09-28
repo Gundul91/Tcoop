@@ -266,6 +266,7 @@
 }
 
 .ChatButton {
+  font-size: 0.8em;
   position: relative;
   left: 0px;
   display: block;

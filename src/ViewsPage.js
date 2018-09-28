@@ -14,20 +14,16 @@ class ViewsPage extends Component {
     let best = {x: 0, y: 0};
     let x;
 
-    console.log("altezza: " + altezza + " larghezza: " + larghezza);
 
     for(let i=1; i<=views.length; i++)
     {
       let y = altezza / i;
-      console.log("i: " + i + " x: " + ((y/9)*16)*Math.ceil(views.length / i) + " y: " + y);
       if(((y/9)*16)*Math.ceil(views.length / i) > larghezza)
       {
         x = larghezza / Math.ceil(views.length / i);
         y = (x/16)*9;
-        console.log("troppo largo x: " + x + " y: " + y);
       } else {
         x = (y/9)*16;
-        console.log("giusto x: " + x);
       }
       if(y > best.y)
       {
@@ -36,65 +32,28 @@ class ViewsPage extends Component {
       }
     }
 
-    console.log(best);
-
     views.forEach((element) =>
     {
       element.style.height = best.y + "px";
       element.style.width = best.x + "px";
     });
 
-    /*altezza = altezza / 9;
-    larghezza = larghezza / 16;
-    let res = altezza / larghezza;
+    // Calcolo dimensioni bottoni chat
 
-    if(res > 1)
+    if((views.length * 33) + 38 > document.querySelector(".ViewsPage").offsetHeight)
     {
-      let calcolo = Math.ceil(views.length / res);
-      let robba = (Math.floor((res) * 2));
-      views.forEach((element) =>
-      {
-        if(views.length <= robba)
-        {
-          element.style.height = "calc( 100% / " + views.length +")";
-          element.style.width = "100%";
-          console.log("1111111111 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba);
-        } else {
-          console.log("2222222 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba);
-          while(((views.length/calcolo) - calcolo) >= 2)
-          {
-            calcolo++;
-          }
-          let cos = Math.ceil((views.length / calcolo));
-          element.style.width = "calc( 100% / " + cos +")";
-          element.style.height = "calc( 100% / " + calcolo +")";
-          console.log("calcolo: " + calcolo + "cos: " + cos );
-        }
+      let height = ((document.querySelector(".ViewsPage").offsetHeight - 38 - (3 * views.length)) / views.length);
+      document.querySelector(".ChatButtons").style.fontSize = (height < 15) ? "0.7em" : "1em";
+      document.querySelectorAll(".ChatButton").forEach((el) => {
+        el.style.height = height  + "px";
       });
-    } else
+    } else if(document.querySelector(".ChatButton").style.height !== "30px")
     {
-      let calcolo = Math.ceil(res * views.length);
-      let robba = (Math.ceil((1/res) * 2));
-      views.forEach((element) =>
-      {
-        if(views.length < robba)
-        {
-          element.style.width = "calc( 100% / " + views.length +")";
-          element.style.height = "100%";
-          console.log("33333333333 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba );
-        } else {
-          console.log("44444444444 " + "res: " + res + "views.length: " + views.length + "altezza: " + altezza + "larghezza: " + larghezza + "calcolo: " + calcolo + "robba: " + robba);
-          while((calcolo - (views.length-calcolo)) >= 2)
-          {
-            calcolo--;
-          }
-          let cos = Math.ceil((views.length / calcolo));
-          element.style.width = "calc( 100% / " + calcolo +")";
-          element.style.height = "calc( 100% / " + cos +")";
-          console.log("calcolo: " + calcolo + "cos: " + cos );
-        }
+      document.querySelector(".ChatButtons").style.fontSize = "1em";
+      document.querySelectorAll(".ChatButton").forEach((el) => {
+        el.style.height = "30px";
       });
-    }*/
+    }
   }
 
   buttonsSize() {
@@ -103,7 +62,6 @@ class ViewsPage extends Component {
 
   // show the selected chat and hide the other
   chatClick(index, el) {
-    console.log(index, document.getElementById('chat_embed_' + index));
     let chats = document.querySelectorAll(".single_chat");
     document.querySelector(".selected_chat").classList.remove("selected_chat");
     document.getElementById('chat_embed_' + index).classList.add("selected_chat");
@@ -127,6 +85,8 @@ class ViewsPage extends Component {
   }
 
   componentDidMount () {
+    if(document.querySelectorAll(".SingleView").length === 1)
+      document.querySelector(".ChatButtons").style.display = "none";
     this.viewsSize();
     window.addEventListener("resize", this.viewsSize.bind(this));
     this.buttonsSize();
