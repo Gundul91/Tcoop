@@ -160,8 +160,10 @@
 /* ----- VIEWSPAGE ----- */
 
 .ViewsPage {
+  position: relative;
   height: 100vh;
   background-color: black;
+  overflow: hidden;
 }
 
 .VideosContainer {
@@ -231,25 +233,43 @@
 .ChatButtons {
   position: absolute;
   right: -87px;
-  top: 30px;
+  top: 32px;
   height: 100%;
   z-index: 1;
 }
 
 .closeButton {
+  width: 40px;
   position: absolute;
   right: 0px;
   z-index: 1;
+  background-color: rgb(163, 163, 163);
+  border-radius: 3px;
+  right: -10px;
+  top: 2px;
+}
+
+.closeButton, .ChatButton {
+  text-align: left;
+  border: none;
+  height: 30px;
+  cursor: pointer;
+  -webkit-box-shadow: -5px 14px 24px -12px rgba(0,0,0,0.75);
+  -moz-box-shadow: -5px 14px 24px -12px rgba(0,0,0,0.75);
+  box-shadow: -5px 14px 24px -12px rgba(0,0,0,0.75);
+}
+
+.closeButton > img {
+  line-height: 30px;
+  width: 15px;
+  pointer-events: none;
 }
 
 .ChatButton {
-  text-align: left;
   position: relative;
   left: 0px;
   display: block;
   width: 100px;
-  height: 30px;
-  border: none;
   background-color: rgb(120, 120, 120);
   color: red;
   font-weight: bolder;
@@ -263,7 +283,7 @@
   left: -80px;
 }
 
-.ChatButton:focus {
+.ChatButton:focus, .closeButton:focus {
   outline: 0;
 }
 

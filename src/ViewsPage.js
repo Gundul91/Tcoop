@@ -110,18 +110,19 @@ class ViewsPage extends Component {
   }
 
   closeChat(el) {
-    console.log(el.target.innerHTML);
-    if(el.target.innerHTML === "X")
+    if(el.target.classList.contains("closeChat"))
     {
-      el.target.innerHTML = "<";
+      document.querySelector(".chatIcon").src="https://png.icons8.com/metro/1600/chat.png";
       document.querySelector(".Chats").style.display = "none";
       document.querySelector(".VideosContainer").style.width = "100%";
       window.dispatchEvent(new Event('resize'));
+      el.target.classList.remove("closeChat");
     } else {
-      el.target.innerHTML = "X";
+      document.querySelector(".chatIcon").src = "https://png.icons8.com/metro/1600/no-chat.png";
       document.querySelector(".Chats").style.display = "inline-block";
       document.querySelector(".VideosContainer").style.width = "calc(100% - 341px)";
       window.dispatchEvent(new Event('resize'));
+      el.target.classList.add("closeChat");
     }
   }
 
@@ -151,7 +152,7 @@ class ViewsPage extends Component {
             )
           }
         </div>
-        <button className="closeButton" onClick={this.closeChat}>X</button>
+        <button className="closeButton closeChat" onClick={this.closeChat}><img className="chatIcon" src="https://png.icons8.com/metro/1600/no-chat.png"></img></button>
         <div className="Chats">
           <div className="ChatButtons">
             {
