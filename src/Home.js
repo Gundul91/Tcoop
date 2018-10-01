@@ -220,6 +220,7 @@ class Home extends Component {
     this.db.collection("chat").doc(this.info_user.login + "_last_chat")
     .onSnapshot(function(doc) {
       let messaggio = doc.data();
+      console.log("messaggio: ", messaggio);
       if(messaggio) {
         if(!document.getElementById("lista_discussione_" + messaggio.utente))
         {
@@ -227,7 +228,6 @@ class Home extends Component {
           button.innerHTML = messaggio.utente;
           button.onclick = function() {
             let chatVarie = document.querySelectorAll("#discussione > ul");
-            console.log(chatVarie);
             chatVarie.forEach((el) => {
               el.style.display = "none";
             });
@@ -250,7 +250,7 @@ class Home extends Component {
   /* WHISPER */
 
   sendMessage() {
-    let utente = document.getElementById('txtRicevente').value.toLowerCase();
+    let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
 
     this.contatore ++;
@@ -258,7 +258,7 @@ class Home extends Component {
 
     // Elemento su cui mettere listener
     let d = new Date();
-    this.db.collection("chat").doc(utente + "_last_chat").set({
+    this.db.collection("chat").doc(utente.toLowerCase() + "_last_chat").set({
       stringa: stringa,
       messaggio: messaggio,
       utente: this.info_user.display_name,
