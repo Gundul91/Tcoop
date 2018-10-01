@@ -6,40 +6,39 @@ import { Link } from 'react-router-dom'
 class ViewsPage extends Component {
 
   viewsSize() {
-    // Adatto le dimenzioni delle views e delle chat al loro numero
+    // Adatto le dimenzioni delle views e dei bottoni delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
     let altezza = document.querySelector(".VideosContainer").offsetHeight;
     let larghezza = document.querySelector(".VideosContainer").offsetWidth;
 
-    let best = {x: 0, y: 0};
-    let x;
+    let best = {w: 0, h: 0};
+    let w, h;
 
 
     for(let i=1; i<=views.length; i++)
     {
-      let y = altezza / i;
-      if(((y/9)*16)*Math.ceil(views.length / i) > larghezza)
+      h = altezza / i;
+      if(((h / 9) * 16) * Math.ceil(views.length / i) > larghezza)
       {
-        x = larghezza / Math.ceil(views.length / i);
-        y = (x/16)*9;
+        w = larghezza / Math.ceil(views.length / i);
+        h = (w / 16) * 9;
       } else {
-        x = (y/9)*16;
+        w = (h / 9) * 16;
       }
-      if(y > best.y)
+      if(h > best.h)
       {
-        best.x = x;
-        best.y = y;
+        best.w = w;
+        best.h = h;
       }
     }
 
     views.forEach((element) =>
     {
-      element.style.height = best.y + "px";
-      element.style.width = best.x + "px";
+      element.style.height = best.h + "px";
+      element.style.width = best.w + "px";
     });
 
     // Calcolo dimensioni bottoni chat
-
     if((views.length * 33) + 38 > document.querySelector(".ViewsPage").offsetHeight)
     {
       let height = ((document.querySelector(".ViewsPage").offsetHeight - 38 - (3 * views.length)) / views.length);
@@ -56,10 +55,6 @@ class ViewsPage extends Component {
     }
   }
 
-  buttonsSize() {
-
-  }
-
   // show the selected chat and hide the other
   chatClick(index, el) {
     let chats = document.querySelectorAll(".single_chat");
@@ -67,13 +62,14 @@ class ViewsPage extends Component {
     document.getElementById('chat_embed_' + index).classList.add("selected_chat");
   }
 
+  // Funzione eseguita al click del bottone di apertura/chiusura chat
   closeChat(el) {
     if(el.target.classList.contains("closeChat"))
     {
       document.querySelector(".chatIcon").src="https://png.icons8.com/metro/1600/chat.png";
       document.querySelector(".Chats").style.display = "none";
       document.querySelector(".VideosContainer").style.width = "100%";
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event('resize')); // Scateno l'evento di "resize" della pagina per far riadattare le views
       el.target.classList.remove("closeChat");
     } else {
       document.querySelector(".chatIcon").src = "https://png.icons8.com/metro/1600/no-chat.png";
@@ -89,7 +85,6 @@ class ViewsPage extends Component {
       document.querySelector(".ChatButtons").style.display = "none";
     this.viewsSize();
     window.addEventListener("resize", this.viewsSize.bind(this));
-    this.buttonsSize();
   }
 
   render() {
