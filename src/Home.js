@@ -79,7 +79,8 @@ class Home extends Component {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
       document.querySelector(".InputAdd").style.display = "none";
-    })
+      this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista").set({});
+    }.bind(this))
     .catch(function(error) {
       console.error("Error adding document: ", error);
     });
@@ -216,35 +217,62 @@ class Home extends Component {
      * Stampa quando cambia l'elemento "login + _last_chat" nel // DB
      * Aggiungere qui la comparsa della notifica di un nuovo messaggio o di una richiesta di tcoop
      */
-    console.log("login_listener: " + this.info_user.login);
-    this.db.collection("chat").doc(this.info_user.login + "_last_chat")
+    console.log("login_listener: " + this.info_user.display_name);
+    this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
     .onSnapshot(function(doc) {
-      let messaggio = doc.data();
-      console.log("messaggio: ", messaggio);
-      if(messaggio) {
-        if(!document.getElementById("lista_discussione_" + messaggio.utente))
+      let da_leggere = doc.data();
+      for(let us in da_leggere)
+      {
+        us
+        if(!document.getElementById("lista_discussione_" + us))
         {
           let button = document.createElement("BUTTON");
-          button.innerHTML = messaggio.utente;
+          button.innerHTML = us;
+          button.style.backgroundColor = "red";
           button.onclick = function() {
             let chatVarie = document.querySelectorAll("#discussione > ul");
             chatVarie.forEach((el) => {
               el.style.display = "none";
             });
-            document.getElementById("lista_discussione_" + messaggio.utente).style.display = "block";
+            document.getElementById("lista_discussione_" + us).style.display = "block";
           };
           document.getElementById("bottoniWhisperers").appendChild(button);
 
           let ul = document.createElement("UL");
-          ul.id = "lista_discussione_" + messaggio.utente;
+          ul.id = "lista_discussione_" + us;
           ul.style.display = "none";
+          // prendere i dati di questa discussione del db e aggiungerli alla lista
           document.getElementById('discussione').appendChild(ul);
+        } else {
+          let li = document.createElement("LI");
+          li.innerHTML = us + ": " + da_leggere[us];
+          document.getElementById("lista_discussione_" + us).appendChild(li);
         }
-        let li = document.createElement("LI");
-        li.innerHTML = messaggio.utente + ": " + messaggio.messaggio;
-        document.getElementById("lista_discussione_" + messaggio.utente).appendChild(li);
       }
     });
+    /*if(messaggio) {
+      if(!document.getElementById("lista_discussione_" + messaggio.utente))
+      {
+        let button = document.createElement("BUTTON");
+        button.innerHTML = messaggio.utente;
+        button.onclick = function() {
+          let chatVarie = document.querySelectorAll("#discussione > ul");
+          chatVarie.forEach((el) => {
+            el.style.display = "none";
+          });
+          document.getElementById("lista_discussione_" + messaggio.utente).style.display = "block";
+        };
+        document.getElementById("bottoniWhisperers").appendChild(button);
+
+        let ul = document.createElement("UL");
+        ul.id = "lista_discussione_" + messaggio.utente;
+        ul.style.display = "none";
+        document.getElementById('discussione').appendChild(ul);
+      }
+      let li = document.createElement("LI");
+      li.innerHTML = messaggio.utente + ": " + messaggio.messaggio;
+      document.getElementById("lista_discussione_" + messaggio.utente).appendChild(li);
+    }*/
   }
 
   /* WHISPER */
@@ -254,15 +282,17 @@ class Home extends Component {
     let messaggio = document.getElementById('txtMessage').value;
 
     this.contatore ++;
-    let stringa = this.info_user.login > utente ? "chat_" + utente + "_" + this.info_user.login : "chat_" + this.info_user.login + "_" + utente;
+    let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
+
+    this.db.collection("chat").doc(utente).collection("messaggi_da_leggere").doc("lista").update({
+      [this.info_user.display_name]: messaggio
+    });
 
     // Elemento su cui mettere listener
-    let d = new Date();
-    this.db.collection("chat").doc(utente.toLowerCase() + "_last_chat").set({
+    this.db.collection("chat").doc(utente + "_da_leggere").collection(utente + "_da_leggere").add({
       stringa: stringa,
       messaggio: messaggio,
-      utente: this.info_user.display_name,
-      contatore: this.contatore
+      utente: this.info_user.display_name
     });
 
     // Aggiungo al DB il messaggio
