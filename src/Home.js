@@ -208,7 +208,7 @@ class Home extends Component {
       });
     }
 
-    this.contatore = 0; // Per MESSAGGI
+    this.contatori = {}; // Per MESSAGGI
 
   }
 
@@ -242,6 +242,15 @@ class Home extends Component {
           ul.id = "lista_discussione_" + us;
           ul.style.display = "none";
           // prendere i dati di questa discussione del db e aggiungerli alla lista
+          let stringa = this.info_user.display_name > us ? "chat_" + us + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + us;
+          this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                let msg = doc.data();
+                let li = document.createElement("LI");
+                li.innerHTML = msg.users + ": " + msg.mess;
+                ul.appendChild(li);
+            });
+          });
           document.getElementById('discussione').appendChild(ul);
         } else {
           let li = document.createElement("LI");
@@ -249,7 +258,7 @@ class Home extends Component {
           document.getElementById("lista_discussione_" + us).appendChild(li);
         }
       }
-    });
+    }.bind(this));
     /*if(messaggio) {
       if(!document.getElementById("lista_discussione_" + messaggio.utente))
       {
@@ -281,7 +290,6 @@ class Home extends Component {
     let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
 
-    this.contatore ++;
     let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
 
     this.db.collection("chat").doc(utente).collection("messaggi_da_leggere").doc("lista").update({
@@ -297,7 +305,33 @@ class Home extends Component {
 
     // Aggiungo al DB il messaggio
     // DA CAMBIARE, OGNI VOLTA CHE RICARICO LA PAGINA IL CONTATORE TORNA A 0 E SOVRASCRIVE I MESSAGGI
-    this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc("messaggio" + this.contatore).set({
+    if(this.contatori[utente]){
+        console.log("esiste id: ",this.contatori[utente]);
+        this.contatori[utente]++;
+        this.contatori[utente] = this.contatori[utente].toString();
+        this.aggiungi();
+    } else {
+      console.log("non esiste id: ");
+      this.contatori[utente] = 0;
+      this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          console.log("non esiste id: ",doc.id);
+          this.contatori[utente] = doc.id + 1;
+          //this.contatori[utente] = doc.id + 1;
+        });
+        this.contatori[utente] = this.contatori[utente].toString();
+        this.aggiungi();
+      });
+    }
+
+  }
+
+  aggiungi() {
+    let utente = document.getElementById('txtRicevente').value;
+    let messaggio = document.getElementById('txtMessage').value;
+
+    let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
+    this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc(this.contatori[utente]).set({
       mess: messaggio,
       users: this.info_user.display_name
     })
