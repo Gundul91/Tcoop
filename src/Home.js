@@ -114,7 +114,7 @@ class Home extends Component {
   // Event cambio testo nel textboxdi testo
   onChange() {
     this.info_user.display_name = document.getElementById('txtUser').value;
-    this.info_user.login = this.info_user.display_name.toLowerCase();
+    this.info_user.login = this.info_user.display_name;
     if(this.state.lista[this.info_user.login])
     {
       document.querySelector(".AddButton").style.display = "none";
@@ -221,15 +221,20 @@ class Home extends Component {
     this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
     .onSnapshot(function(doc) {
       let da_leggere = doc.data();
+      console.log("cambiato: ", da_leggere);
       for(let us in da_leggere)
       {
-        us
         if(!document.getElementById("lista_discussione_" + us))
         {
           let button = document.createElement("BUTTON");
+          let dbRef = this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista");
           button.innerHTML = us;
           button.style.backgroundColor = "red";
           button.onclick = function() {
+            this.style.backgroundColor = "";
+            dbRef.update({
+              [us]: firebase.firestore.FieldValue.delete()
+            });
             let chatVarie = document.querySelectorAll("#discussione > ul");
             chatVarie.forEach((el) => {
               el.style.display = "none";
@@ -254,7 +259,7 @@ class Home extends Component {
           document.getElementById('discussione').appendChild(ul);
         } else {
           let li = document.createElement("LI");
-          li.innerHTML = us + ": " + da_leggere[us];
+          li.innerHTML = us + ": " + da_leggere[us].messaggio;
           document.getElementById("lista_discussione_" + us).appendChild(li);
         }
       }
@@ -293,22 +298,16 @@ class Home extends Component {
     let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
 
     this.db.collection("chat").doc(utente).collection("messaggi_da_leggere").doc("lista").update({
-      [this.info_user.display_name]: messaggio
+      [this.info_user.display_name]: {messaggio: messaggio,
+      randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
     });
 
-    // Elemento su cui mettere listener
-    this.db.collection("chat").doc(utente + "_da_leggere").collection(utente + "_da_leggere").add({
-      stringa: stringa,
-      messaggio: messaggio,
-      utente: this.info_user.display_name
-    });
-
+    console.log("utente: ", utente, "messaggio: ", messaggio, "this.contatori", this.contatori);
     // Aggiungo al DB il messaggio
     // DA CAMBIARE, OGNI VOLTA CHE RICARICO LA PAGINA IL CONTATORE TORNA A 0 E SOVRASCRIVE I MESSAGGI
     if(this.contatori[utente]){
         console.log("esiste id: ",this.contatori[utente]);
-        this.contatori[utente]++;
-        this.contatori[utente] = this.contatori[utente].toString();
+        this.contatori[utente] = (this.contatori[utente][this.contatori[utente].length-1] === "9") ? (this.contatori[utente] + 1) : (parseInt(this.contatori[utente]) + 1).toString();
         this.aggiungi();
     } else {
       console.log("non esiste id: ");
@@ -316,8 +315,7 @@ class Home extends Component {
       this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
           console.log("non esiste id: ",doc.id);
-          this.contatori[utente] = doc.id + 1;
-          //this.contatori[utente] = doc.id + 1;
+          this.contatori[utente] = (doc.id[doc.id.length-1] === "9") ? doc.id + 1 : parseInt(doc.id) + 1;
         });
         this.contatori[utente] = this.contatori[utente].toString();
         this.aggiungi();
