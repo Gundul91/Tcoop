@@ -235,17 +235,16 @@ class Home extends Component {
             dbRef.update({
               [us]: firebase.firestore.FieldValue.delete()
             });
-            let chatVarie = document.querySelectorAll("#discussione > ul");
-            chatVarie.forEach((el) => {
-              el.style.display = "none";
-            });
-            document.getElementById("lista_discussione_" + us).style.display = "block";
+            let whispAperta = document.querySelector(".selectedWhisp");
+            if(whispAperta)
+              whispAperta.className = "whisp";
+            document.getElementById("lista_discussione_" + us).className = "selectedWhisp";
           };
           document.getElementById("bottoniWhisperers").appendChild(button);
 
           let ul = document.createElement("UL");
           ul.id = "lista_discussione_" + us;
-          ul.style.display = "none";
+          ul.className = "whisp";
           // prendere i dati di questa discussione del db e aggiungerli alla lista
           let stringa = this.info_user.display_name > us ? "chat_" + us + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + us;
           this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {

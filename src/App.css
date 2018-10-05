@@ -33,6 +33,14 @@
   padding: 5px;
 }
 
+.selectedWhisp {
+  display: block;
+}
+
+.whisp {
+  display: none;
+}
+
 #discussione {
   background-color: white;
 }
