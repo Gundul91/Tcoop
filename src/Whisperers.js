@@ -14,7 +14,7 @@ class Whisperers extends Component {
         A chi mandare:
         <input type="text" id="txtRicevente" placeholder="Nick ricevente"></input><br/>
         Messaggi:
-        <input type="text" id="txtMessage" placeholder="Inserisci il messaggio"></input><br/>
+        <input type="text" id="txtMessage" placeholder="Inserisci il messaggio" onClick={this.props.msgClick}></input><br/>
         Pres:
         <button className="sendMessage" onClick={this.props.sendMessage}>Manda messaggio</button>
       </div>

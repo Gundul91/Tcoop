@@ -245,7 +245,6 @@ class Home extends Component {
           let ul = document.createElement("UL");
           ul.id = "lista_discussione_" + us;
           ul.className = "whisp";
-          // prendere i dati di questa discussione del db e aggiungerli alla lista
           let stringa = this.info_user.display_name > us ? "chat_" + us + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + us;
           this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
@@ -286,6 +285,15 @@ class Home extends Component {
       li.innerHTML = messaggio.utente + ": " + messaggio.messaggio;
       document.getElementById("lista_discussione_" + messaggio.utente).appendChild(li);
     }*/
+  }
+
+  msgClick() {
+    let whispAperta = document.querySelector(".selectedWhisp");
+    if(whispAperta) {
+      this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista").update({
+        [whispAperta.id.substring(18)]: firebase.firestore.FieldValue.delete()
+      });
+    }
   }
 
   /* WHISPER */
@@ -368,7 +376,7 @@ class Home extends Component {
           <br/>
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
-        <Whisperers sendMessage={this.sendMessage.bind(this)}/>
+        <Whisperers sendMessage={this.sendMessage.bind(this)} msgClick={this.msgClick.bind(this)}/>
         <TopBar info_user={this.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} userInList={this.state.lista[this.info_user.login]}/>
         <div className="listaStreaming">
           {
