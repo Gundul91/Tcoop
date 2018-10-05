@@ -4,6 +4,7 @@ import Streaming from './Streaming.js'
 import TopBar from './TopBar.js'
 import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
+import { withRouter } from 'react-router-dom';
 
 
 const firebase = require("firebase");
@@ -158,6 +159,7 @@ class Home extends Component {
         streamer_name={key}
         presenti={item.presenti}
         necessari={item.necessari}
+        toStreamingPage={this.toStreamingPage.bind(this)}
       />);
     }
     return objs;
@@ -210,6 +212,14 @@ class Home extends Component {
 
     this.contatori = {}; // Per MESSAGGI
 
+  }
+
+  toStreamingPage(el) {
+    while(!el.target.classList.contains("Streaming")){
+      el.target = el.target.parentElement;
+    }
+    this.props.history.push(el.target.classList.item(1));
+    //console.log(el.getElementsByClassName("streamerName"));
   }
 
   addLastchatListener() {
@@ -388,4 +398,4 @@ class Home extends Component {
   }
 }
 
-export default Home;
+export default withRouter(Home);

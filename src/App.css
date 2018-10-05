@@ -94,6 +94,7 @@
   border: solid 1px red;
   width: calc(100% / 3);
   position: relative;
+  cursor: pointer;
 }
 
 .streamingImg {
@@ -120,11 +121,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.streamingTitle,
-.streamingGame{
-  cursor: pointer;
 }
 
 .streamingTitle {
