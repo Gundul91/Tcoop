@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 class ViewsPage extends Component {
 
   viewsSize() {
+    console.log("viewsSize()");
     // Adatto le dimenzioni delle views e dei bottoni delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
     let altezza = document.querySelector(".videosContainer").offsetHeight;

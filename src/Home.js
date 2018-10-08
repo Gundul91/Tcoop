@@ -147,6 +147,7 @@ class Home extends Component {
 
   // Restituisce la lista di elementi <Streaming> contenenti le info di chi cerca coop
   getList() {
+    console.log("getList()");
     let objs = [];
     for (var key in this.state.lista) {
       let item = this.state.lista[key];
@@ -167,15 +168,18 @@ class Home extends Component {
 
   // Inizializza il collegamento con il db di firebase
   componentWillMount() {
-    // Settings per firebase
-    firebase.initializeApp({
-      apiKey: "AIzaSyCaQYYVlMGO7ha0g31l6iYPLxj8pNb9c0o",
-      authDomain: "tcoop-6668f.firebaseapp.com",
-      databaseURL: "https://tcoop-6668f.firebaseio.com",
-      projectId: "tcoop-6668f",
-      storageBucket: "tcoop-6668f.appspot.com",
-      messagingSenderId: "429000425300"
-    });
+    // Se firebase è già inizializzato non ripete l'inizializzazione
+    if (!firebase.apps.length) {
+      // Settings per firebase
+      firebase.initializeApp({
+        apiKey: "AIzaSyCaQYYVlMGO7ha0g31l6iYPLxj8pNb9c0o",
+        authDomain: "tcoop-6668f.firebaseapp.com",
+        databaseURL: "https://tcoop-6668f.firebaseio.com",
+        projectId: "tcoop-6668f",
+        storageBucket: "tcoop-6668f.appspot.com",
+        messagingSenderId: "429000425300"
+      });
+    }
 
     // Initialize Cloud Firestore through Firebase
     this.db = firebase.firestore();
@@ -272,29 +276,6 @@ class Home extends Component {
         }
       }
     }.bind(this));
-    /*if(messaggio) {
-      if(!document.getElementById("lista_discussione_" + messaggio.utente))
-      {
-        let button = document.createElement("BUTTON");
-        button.innerHTML = messaggio.utente;
-        button.onclick = function() {
-          let chatVarie = document.querySelectorAll("#discussione > ul");
-          chatVarie.forEach((el) => {
-            el.style.display = "none";
-          });
-          document.getElementById("lista_discussione_" + messaggio.utente).style.display = "block";
-        };
-        document.getElementById("bottoniWhisperers").appendChild(button);
-
-        let ul = document.createElement("UL");
-        ul.id = "lista_discussione_" + messaggio.utente;
-        ul.style.display = "none";
-        document.getElementById('discussione').appendChild(ul);
-      }
-      let li = document.createElement("LI");
-      li.innerHTML = messaggio.utente + ": " + messaggio.messaggio;
-      document.getElementById("lista_discussione_" + messaggio.utente).appendChild(li);
-    }*/
   }
 
   msgClick() {
