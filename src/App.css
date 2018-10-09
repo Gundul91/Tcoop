@@ -89,6 +89,17 @@
 
 /* ----- HOME ----- */
 
+.anteprima {
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  z-index: 10;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+}
+
 .Streaming {
   display: inline-block;
   border: solid 1px red;

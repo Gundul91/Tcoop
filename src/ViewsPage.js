@@ -90,8 +90,17 @@ class ViewsPage extends Component {
 
   render() {
     // Prendo nomi streamers dall'url, li separo e rimmuovo il primo elemento vuoto"
-    let streamers = this.props.location.pathname.split("/")
-    streamers.shift()
+    let streamers = []
+    if(this.props.location)
+    {
+      streamers= this.props.location.pathname.split("/")
+      streamers.shift()
+    }
+
+    if(this.props.path)
+      streamers[0] = this.props.path
+    console.log("streamers: ", streamers)
+    /*if(streamers[streamers.length -1][0] === "#")*/
 
     /* Scorre l'arrey di streamer e aggiunge un "SingleView" ciascuno
      * Aggiunto anche un bottone ed una chat per ogni streamer

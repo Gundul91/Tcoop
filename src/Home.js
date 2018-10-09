@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom'
 import queryString from 'query-string';
 import Streaming from './Streaming.js'
 import TopBar from './TopBar.js'
 import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
 import { withRouter } from 'react-router-dom';
+import ViewsPage from './ViewsPage.js'
 
 
 const firebase = require("firebase");
@@ -222,8 +224,19 @@ class Home extends Component {
     while(!el.target.classList.contains("Streaming")){
       el.target = el.target.parentElement;
     }
-    this.props.history.push(el.target.classList.item(1));
-    //console.log(el.getElementsByClassName("streamerName"));
+    /*var tmp = document.createElement("div");
+    tmp.appendChild(document.querySelector(".Whisperers"));
+    this.props.history.push({pathname: el.target.classList.item(1), state: {info_user: this.info_user}});*/
+    //this.props.history.push(el.target.classList.item(1));
+
+
+    // AGGIUNTI ANTEPRIMA AL CLICK DELLO STREAMING IN LISTA
+    ReactDOM.render(<ViewsPage path={el.target.classList.item(1)}/>, document.querySelector(".anteprima"));
+    document.querySelector(".viewsPage").style.height = "100%";
+    document.querySelector(".videosContainer").style.height = "100%";
+    document.querySelector(".videosContainer").style.width = "100%";
+    document.querySelector(".chats").style.display = "none";
+    window.dispatchEvent(new Event('resize'));
   }
 
   addLastchatListener() {
@@ -351,6 +364,7 @@ class Home extends Component {
     this.access_info = queryString.parse(this.props.location.hash);
     return (
       <div className="Home">
+        <div className="anteprima"></div>
         <InputAdd addToBD={this.addToBD.bind(this)}/>
         <div className="boxTest">
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
