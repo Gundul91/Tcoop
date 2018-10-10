@@ -231,12 +231,30 @@ class Home extends Component {
 
 
     // AGGIUNTI ANTEPRIMA AL CLICK DELLO STREAMING IN LISTA
-    ReactDOM.render(<ViewsPage path={el.target.classList.item(1)}/>, document.querySelector(".anteprima"));
+    let anteprima = document.querySelector(".anteprima");
+    ReactDOM.render(<ViewsPage path={el.target.classList.item(1)}/>, anteprima);
+    anteprima.style.display = "block";
+    document.querySelector(".cover").style.display = "block";
     document.querySelector(".viewsPage").style.height = "100%";
     document.querySelector(".videosContainer").style.height = "100%";
     document.querySelector(".videosContainer").style.width = "100%";
     document.querySelector(".chats").style.display = "none";
+    document.querySelector(".closeButton").style.display = "none";
     window.dispatchEvent(new Event('resize'));
+
+    document.addEventListener("click", function handler(event) {
+
+      // If user clicks inside the element, do nothing
+      if (event.target.closest(".anteprima")) return;
+
+      // If user clicks outside the element, hide it!
+      anteprima.style.display = "none";
+      document.querySelector(".cover").style.display = "none";
+      ReactDOM.unmountComponentAtNode(anteprima)
+
+      event.currentTarget.removeEventListener(event.type, handler);
+    });
+
   }
 
   addLastchatListener() {
@@ -365,6 +383,7 @@ class Home extends Component {
     return (
       <div className="Home">
         <div className="anteprima"></div>
+        <div className="cover"></div>
         <InputAdd addToBD={this.addToBD.bind(this)}/>
         <div className="boxTest">
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>

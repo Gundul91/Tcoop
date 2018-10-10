@@ -90,14 +90,25 @@
 /* ----- HOME ----- */
 
 .anteprima {
-  position: absolute;
+  position: fixed;
+  display: none;
   width: 80%;
   height: 80%;
   z-index: 10;
-  margin-left: auto;
-  margin-right: auto;
+  margin: auto;
   left: 0;
   right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-color: rgba(71, 71, 71, 0.83);
+  z-index: 9;
+  display: none;
 }
 
 .Streaming {
