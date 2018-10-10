@@ -111,6 +111,18 @@
   display: none;
 }
 
+.partecipa {
+  display: none;
+  position: fixed;
+  margin: auto;
+  width: 100px;
+  height: 30px;
+  top: 3%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
 .Streaming {
   display: inline-block;
   border: solid 1px red;

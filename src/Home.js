@@ -232,7 +232,8 @@ class Home extends Component {
 
     // AGGIUNTI ANTEPRIMA AL CLICK DELLO STREAMING IN LISTA
     let anteprima = document.querySelector(".anteprima");
-    ReactDOM.render(<ViewsPage path={el.target.classList.item(1)}/>, anteprima);
+    this.selectedStreaming = el.target.classList.item(1);
+    ReactDOM.render(<ViewsPage path={this.selectedStreaming}/>, anteprima);
     anteprima.style.display = "block";
     document.querySelector(".cover").style.display = "block";
     document.querySelector(".viewsPage").style.height = "100%";
@@ -240,16 +241,19 @@ class Home extends Component {
     document.querySelector(".videosContainer").style.width = "100%";
     document.querySelector(".chats").style.display = "none";
     document.querySelector(".closeButton").style.display = "none";
+    document.querySelector(".partecipa").style.display = "block";
+
     window.dispatchEvent(new Event('resize'));
 
     document.addEventListener("click", function handler(event) {
 
       // If user clicks inside the element, do nothing
-      if (event.target.closest(".anteprima")) return;
+      if (event.target.closest(".anteprima") || event.target.closest(".partecipa") || event.target.closest(".Whisperers")) return;
 
       // If user clicks outside the element, hide it!
       anteprima.style.display = "none";
       document.querySelector(".cover").style.display = "none";
+      document.querySelector(".partecipa").style.display = "none";
       ReactDOM.unmountComponentAtNode(anteprima)
 
       event.currentTarget.removeEventListener(event.type, handler);
@@ -298,15 +302,26 @@ class Home extends Component {
                 li.innerHTML = msg.users + ": " + msg.mess;
                 ul.appendChild(li);
             });
+            if(da_leggere[us].richiesta) {
+              let li = document.createElement("LI");
+              li.innerHTML = "bottone richiesta";
+              ul.appendChild(li);
+            }
           });
           document.getElementById('discussione').appendChild(ul);
         } else {
           let li = document.createElement("LI");
-          li.innerHTML = us + ": " + da_leggere[us].messaggio;
+          li.innerHTML = (da_leggere[us].richiesta) ? "bottone richiesta" : us + ": " + da_leggere[us].messaggio;
           document.getElementById("lista_discussione_" + us).appendChild(li);
         }
       }
     }.bind(this));
+  }
+
+  partecipa() {
+    this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
+      [this.info_user.display_name]: {richiesta: true}
+    });
   }
 
   msgClick() {
@@ -384,6 +399,7 @@ class Home extends Component {
       <div className="Home">
         <div className="anteprima"></div>
         <div className="cover"></div>
+        <button className="partecipa" onClick={this.partecipa.bind(this)}>PARTECIPA!</button>
         <InputAdd addToBD={this.addToBD.bind(this)}/>
         <div className="boxTest">
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
