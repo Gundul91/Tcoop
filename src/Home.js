@@ -65,10 +65,6 @@ class Home extends Component {
     if(document.getElementById('txtTitle').value !== '')
       this.str_info.data[0].title = document.getElementById('txtTitle').value;
 
-
-    //Da midificare la if e aggiungere il numero di persone cercate
-
-
     this.db.collection("user").doc(this.info_user.login).set({
       img_url: this.str_info.data[0].thumbnail_url,
       game_name: this.game_info.data[0].name,
@@ -162,7 +158,7 @@ class Home extends Component {
         streamer_name={key}
         presenti={item.presenti}
         necessari={item.necessari}
-        toStreamingPage={this.toStreamingPage.bind(this)}
+        mostraAnteprima={this.mostraAnteprima.bind(this)}
       />);
     }
     return objs;
@@ -220,18 +216,17 @@ class Home extends Component {
 
   }
 
-  toStreamingPage(el) {
+  // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
+  mostraAnteprima(el) {
+    // Scorre fino all'elemento Streaming che nlle classi ha il nome della coop
     while(!el.target.classList.contains("Streaming")){
       el.target = el.target.parentElement;
     }
-    /*var tmp = document.createElement("div");
-    tmp.appendChild(document.querySelector(".Whisperers"));
-    this.props.history.push({pathname: el.target.classList.item(1), state: {info_user: this.info_user}});*/
-    //this.props.history.push(el.target.classList.item(1));
 
-
-    // AGGIUNTI ANTEPRIMA AL CLICK DELLO STREAMING IN LISTA
     let anteprima = document.querySelector(".anteprima");
+
+    // AGGIUNTI NICK RANDOM PER TESTARE CON PIù VISUALIZZAZIONI, DOVRA' MOSTRARE LA COOP
+    // la seconda classe di el.target è il nome della coop
     this.selectedStreaming = el.target.classList.item(1) + "/Gundul91/Ninja";
     let ref = ReactDOM.render(<ViewsPage path={this.selectedStreaming}/>, anteprima);
     anteprima.style.display = "block";
@@ -243,22 +238,24 @@ class Home extends Component {
     document.querySelector(".closeButton").style.display = "none";
     document.querySelector(".partecipa").style.display = "block";
 
+    //Scateno il resize per far calcolare le proporzioni delle views
     window.dispatchEvent(new Event('resize'));
 
     document.addEventListener("click", function handler(event) {
 
-      // If user clicks inside the element, do nothing
+      // Se clicca sull'elemento / chat / bottone partecipa non succede nulla
       if (event.target.closest(".anteprima") || event.target.closest(".partecipa") || event.target.closest(".Whisperers")) return;
 
-      // If user clicks outside the element, hide it!
+      // Se clicca fuori rimuovo l'anteprima
       anteprima.style.display = "none";
       document.querySelector(".cover").style.display = "none";
       document.querySelector(".partecipa").style.display = "none";
+      // Rimuovo il listener per il resize della finestra
       ref.removeListener();
       ReactDOM.unmountComponentAtNode(anteprima);
-
+      // Rimuovo questo click event handler
       event.currentTarget.removeEventListener(event.type, handler);
-    }.bind(this));
+    });
 
   }
 
@@ -319,6 +316,9 @@ class Home extends Component {
     }.bind(this));
   }
 
+  /* MANDA RICHIESTA DI PARTECIPAZIONE ALLA COOP
+   * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
+   */
   partecipa() {
     this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
       [this.info_user.display_name]: {richiesta: true}

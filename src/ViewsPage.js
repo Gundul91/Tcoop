@@ -82,7 +82,6 @@ class ViewsPage extends Component {
 
   removeListener() {
     window.removeEventListener("resize", this.viewsSizeBindato);
-    console.log("listener rimosso");
   }
 
   componentDidMount () {

@@ -21,8 +21,6 @@ class InputAdd extends Component {
       <div className="InputAdd">
         Title:
         <input type="text" id="txtTitle" placeholder="inserire titolo"></input><br/>
-        Num:
-        <input type="text" id="txtNumber" placeholder="inserire numero partecipanti"></input><br/>
         Pres:
         <select className="presenti" onChange={this.changePresenti}>
           <option value="1">1</option>
