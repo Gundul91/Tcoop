@@ -232,8 +232,8 @@ class Home extends Component {
 
     // AGGIUNTI ANTEPRIMA AL CLICK DELLO STREAMING IN LISTA
     let anteprima = document.querySelector(".anteprima");
-    this.selectedStreaming = el.target.classList.item(1);
-    ReactDOM.render(<ViewsPage path={this.selectedStreaming}/>, anteprima);
+    this.selectedStreaming = el.target.classList.item(1) + "/Gundul91/Ninja";
+    let ref = ReactDOM.render(<ViewsPage path={this.selectedStreaming}/>, anteprima);
     anteprima.style.display = "block";
     document.querySelector(".cover").style.display = "block";
     document.querySelector(".viewsPage").style.height = "100%";
@@ -254,10 +254,11 @@ class Home extends Component {
       anteprima.style.display = "none";
       document.querySelector(".cover").style.display = "none";
       document.querySelector(".partecipa").style.display = "none";
-      ReactDOM.unmountComponentAtNode(anteprima)
+      ref.removeListener();
+      ReactDOM.unmountComponentAtNode(anteprima);
 
       event.currentTarget.removeEventListener(event.type, handler);
-    });
+    }.bind(this));
 
   }
 

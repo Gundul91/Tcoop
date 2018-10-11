@@ -9,12 +9,11 @@ class ViewsPage extends Component {
     console.log("viewsSize()");
     // Adatto le dimenzioni delle views e dei bottoni delle chat al loro numero
     let views = document.querySelectorAll(".SingleView");
-    let altezza = document.querySelector(".videosContainer").offsetHeight;
-    let larghezza = document.querySelector(".videosContainer").offsetWidth;
+    let altezza = document.querySelector(".videosContainer").offsetHeight - 1;
+    let larghezza = document.querySelector(".videosContainer").offsetWidth - 1;
 
     let best = {w: 0, h: 0};
     let w, h;
-
 
     for(let i=1; i<=views.length; i++)
     {
@@ -81,11 +80,17 @@ class ViewsPage extends Component {
     }
   }
 
+  removeListener() {
+    window.removeEventListener("resize", this.viewsSizeBindato);
+    console.log("listener rimosso");
+  }
+
   componentDidMount () {
     if(document.querySelectorAll(".SingleView").length === 1)
       document.querySelector(".chatButtons").style.display = "none";
     this.viewsSize();
-    window.addEventListener("resize", this.viewsSize.bind(this));
+    this.viewsSizeBindato = this.viewsSize.bind(this);
+    window.addEventListener("resize", this.viewsSizeBindato);
   }
 
   render() {
@@ -93,12 +98,14 @@ class ViewsPage extends Component {
     let streamers = []
     if(this.props.location)
     {
-      streamers= this.props.location.pathname.split("/")
+      streamers = this.props.location.pathname.split("/")
       streamers.shift()
     }
 
     if(this.props.path)
-      streamers[0] = this.props.path
+    {
+      streamers = this.props.path.split("/")
+    }
     console.log("streamers: ", streamers)
     /*if(streamers[streamers.length -1][0] === "#")*/
 
