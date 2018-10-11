@@ -216,6 +216,8 @@ class Home extends Component {
 
   }
 
+  // ---- COMMENTATO DA QUI IN AVANTI, CONTROLLARE PRIMA E RENDER() ------ 
+
   // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
   mostraAnteprima(el) {
     // Scorre fino all'elemento Streaming che nlle classi ha il nome della coop
@@ -259,18 +261,17 @@ class Home extends Component {
 
   }
 
+  // LISTENER SUL CAMBIO DELL'ELEMENTO "login + _last_chat" NEL DB
   addLastchatListener() {
-    /* LISTENER SU ELEMENTO DEL DB
-     * Stampa quando cambia l'elemento "login + _last_chat" nel // DB
-     * Aggiungere qui la comparsa della notifica di un nuovo messaggio o di una richiesta di tcoop
-     */
     console.log("login_listener: " + this.info_user.display_name);
     this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
     .onSnapshot(function(doc) {
       let da_leggere = doc.data();
       console.log("cambiato: ", da_leggere);
+      // us sono le key che sono i nick mentre da_leggere e l'array di messaggi_da_leggere
       for(let us in da_leggere)
       {
+        // Se la lista non esiste la crea e la riempie
         if(!document.getElementById("lista_discussione_" + us))
         {
           let button = document.createElement("BUTTON");
@@ -279,9 +280,11 @@ class Home extends Component {
           button.style.backgroundColor = "red";
           button.onclick = function() {
             this.style.backgroundColor = "";
+            // Rimmuove us dalla lista dei messaggi da leggere
             dbRef.update({
               [us]: firebase.firestore.FieldValue.delete()
             });
+            // Cambia le classi alle liste per visualizzare qulla selezionata
             let whispAperta = document.querySelector(".selectedWhisp");
             if(whispAperta)
               whispAperta.className = "whisp";
@@ -294,12 +297,14 @@ class Home extends Component {
           ul.className = "whisp";
           let stringa = this.info_user.display_name > us ? "chat_" + us + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + us;
           this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
+            // Scorre i messaggi del DB e li aggiunge alla lista
             querySnapshot.forEach((doc) => {
                 let msg = doc.data();
                 let li = document.createElement("LI");
                 li.innerHTML = msg.users + ": " + msg.mess;
                 ul.appendChild(li);
             });
+            // Se c'è una richiesta di coop viene aggiunta alla chat
             if(da_leggere[us].richiesta) {
               let li = document.createElement("LI");
               li.innerHTML = "bottone richiesta";
@@ -308,6 +313,7 @@ class Home extends Component {
           });
           document.getElementById('discussione').appendChild(ul);
         } else {
+          // Se la lista esiste aggiunge il messaggio ad essa
           let li = document.createElement("LI");
           li.innerHTML = (da_leggere[us].richiesta) ? "bottone richiesta" : us + ": " + da_leggere[us].messaggio;
           document.getElementById("lista_discussione_" + us).appendChild(li);
@@ -325,9 +331,13 @@ class Home extends Component {
     });
   }
 
+  /* ESEGUITA ALLA APERTURA DI UNA CHAT PRIVATA
+   * Cancella dal db i messaggi da leggere della chat che viene aperta
+   */
   msgClick() {
     let whispAperta = document.querySelector(".selectedWhisp");
     if(whispAperta) {
+      // whispAperta.id.substring(18) prende solo la stringa dopo i primi 18 caratteri che contiene il nome dello streamer
       this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista").update({
         [whispAperta.id.substring(18)]: firebase.firestore.FieldValue.delete()
       });
@@ -336,27 +346,31 @@ class Home extends Component {
 
   /* WHISPER */
 
+  // INVIO MESSAGGIO PRIVATO
   sendMessage() {
     let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
 
+    // Crea una stringa con i nick ordinati che indicherà la chat nel DB
     let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
 
+    // Aggiunge messaggio alla lista dei messaggi da leggere del ricevente
     this.db.collection("chat").doc(utente).collection("messaggi_da_leggere").doc("lista").update({
       [this.info_user.display_name]: {messaggio: messaggio,
       randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
     });
 
-    console.log("utente: ", utente, "messaggio: ", messaggio, "this.contatori", this.contatori);
     // Aggiungo al DB il messaggio
-    // DA CAMBIARE, OGNI VOLTA CHE RICARICO LA PAGINA IL CONTATORE TORNA A 0 E SOVRASCRIVE I MESSAGGI
     if(this.contatori[utente]){
         console.log("esiste id: ",this.contatori[utente]);
+        // Calcolo il valore da dare al contatore di questa chat che verrà usato come key del messaggio
         this.contatori[utente] = (this.contatori[utente][this.contatori[utente].length-1] === "9") ? (this.contatori[utente] + 1) : (parseInt(this.contatori[utente]) + 1).toString();
         this.aggiungi();
     } else {
       console.log("non esiste id: ");
       this.contatori[utente] = 0;
+      // Scorro tutta la discussione per avere l'ultima key e da questa creare la successiva
+      // TROVARE SOLUZIONE MIGLIORE DI SCORRE TUTTO PER AVERE L'ULTIMA KEY
       this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
           console.log("non esiste id: ",doc.id);
@@ -366,9 +380,9 @@ class Home extends Component {
         this.aggiungi();
       });
     }
-
   }
 
+  // AGGIUNGE IL MESSAGGIO PRIVATO ALLA DISCUSSIONE NEL DB
   aggiungi() {
     let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
@@ -379,6 +393,7 @@ class Home extends Component {
       users: this.info_user.display_name
     })
     .then(() => {
+      // Aggiunge il messaggio alla lista nella finestra
       if(!document.getElementById("lista_discussione_" + utente))
       {
         let ul = document.createElement("UL");
