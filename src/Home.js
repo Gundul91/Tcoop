@@ -20,8 +20,9 @@ class Home extends Component {
 
   info_user = {}
 
+  // PRENDE I DATI DELL'UTENTE E SE E' LIVE MOSTRA LA SCHERMATA PER L'AGGIUNTA ALLA LISTA DI RICERCA COOP
   addToList() {
-    // per test
+    // X TEST
     let testValue = document.getElementById('txtUser').value;
     if(testValue)
       this.info_user.login = testValue
@@ -36,7 +37,7 @@ class Home extends Component {
     .then(function(c) {
       return c.json()
     }).then(function(str_info) {
-      console.log(str_info)
+      // Può aggiungersi alla lista solo se è in live
       if(str_info.data.length === 0)
       {
         console.log("non è live")
@@ -50,18 +51,20 @@ class Home extends Component {
         .then(function(c) {
           return c.json()
         }).then(function(game_info) {
-          console.log(game_info)
           console.log("è live su " + game_info.data[0].name)
           this.str_info = str_info;
           this.game_info = game_info;
+          // mostra la schermata di aggiunta al db
           document.querySelector(".InputAdd").style.display = "block";
         }.bind(this))
       }
     }.bind(this))
   }
 
+  /* AGGIUNGE L'USER AL DB
+   * Viene eseguito quando l'utente clicca di aggiungersi al DB nella finestra InputAdd
+   */
   addToBD() {
-    // Aggiunge queste informazione al DB nella collection "user"
     if(document.getElementById('txtTitle').value !== '')
       this.str_info.data[0].title = document.getElementById('txtTitle').value;
 
@@ -85,65 +88,14 @@ class Home extends Component {
     });
   }
 
-  // Richiamata dal click sul bottone "Stampa DB" stampa il contenuto del DB
-  stampaDB() {
-    this.db.collection("user").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            console.log(doc.id, doc.data());
-        });
-    });
-  }
-
-  updateDB() {
-    var washingtonRef = this.db.collection("user").doc("jB41qkZsJZWQvWcXoRbx");
-
-    // Set the "capital" field of the city 'DC'
-    return washingtonRef.update({
-        name: null
-    })
-    .then(function() {
-        console.log("Document successfully updated!");
-    })
-    .catch(function(error) {
-        // The document probably doesn't exist.
-        console.error("Error updating document: ", error);
-    });
-  }
-
-  // Event cambio testo nel textboxdi testo
-  onChange() {
-    this.info_user.display_name = document.getElementById('txtUser').value;
-    this.info_user.login = this.info_user.display_name;
-    if(this.state.lista[this.info_user.login])
-    {
-      document.querySelector(".AddButton").style.display = "none";
-      document.querySelector(".DeleteButton").style.display = "inline-block";
-    } else {
-      document.querySelector(".AddButton").style.display = "inline-block";
-      document.querySelector(".DeleteButton").style.display = "none";
-    }
-
-    this.addLastchatListener();
-  }
-
+  // RIMMUOVE STREAMER DALLA LISTA DI RICERCA NEL DB
   deleteDB() {
     this.db.collection('user').doc(this.info_user.login).delete();
     document.querySelector(".AddButton").style.display = "inline-block";
     document.querySelector(".DeleteButton").style.display = "none";
   }
 
-  // Richiede la lista al DB e la mette in this.state.lista
-  showDB() {
-    let obj = {};
-    this.db.collection("user").get().then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-          obj[doc.id] = doc.data();
-      });
-      this.setState({lista: obj});
-    })
-  }
-
-  // Restituisce la lista di elementi <Streaming> contenenti le info di chi cerca coop
+  // RESTITUISCE LA LISTA DI ELEMENTI <Streaming> CONTENENTI LE INFO DI CHI CERCA COOP
   getList() {
     console.log("getList()");
     let objs = [];
@@ -164,7 +116,7 @@ class Home extends Component {
     return objs;
   }
 
-  // Inizializza il collegamento con il db di firebase
+  // INIZIALIZZO IL COLLEGAMENTO CON IL DB DI FIREBASE
   componentWillMount() {
     // Se firebase è già inizializzato non ripete l'inizializzazione
     if (!firebase.apps.length) {
@@ -190,7 +142,7 @@ class Home extends Component {
     this.showDB();
   }
 
-  // Richiede i dati di chi accede
+  // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
   componentDidMount() {
     // Se è stato fatto l'accesso con twitch richiedo i dati dell'utente
     if(this.access_info.access_token !== undefined)
@@ -215,8 +167,6 @@ class Home extends Component {
     this.contatori = {}; // Per MESSAGGI
 
   }
-
-  // ---- COMMENTATO DA QUI IN AVANTI, CONTROLLARE PRIMA E RENDER() ------ 
 
   // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
   mostraAnteprima(el) {
@@ -409,6 +359,46 @@ class Home extends Component {
     });
   }
 
+  // ----- TEST -----
+
+  // X TEST: Richiamata dal click sul bottone "Stampa DB" stampa il contenuto del DB
+  stampaDB() {
+    this.db.collection("user").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            console.log(doc.id, doc.data());
+        });
+    });
+  }
+
+  // X TEST: EVENTO CAMBIO TESTO NEL TEXTBOX DI TEST
+  onChange() {
+    this.info_user.display_name = document.getElementById('txtUser').value;
+    this.info_user.login = this.info_user.display_name;
+    if(this.state.lista[this.info_user.login])
+    {
+      document.querySelector(".AddButton").style.display = "none";
+      document.querySelector(".DeleteButton").style.display = "inline-block";
+    } else {
+      document.querySelector(".AddButton").style.display = "inline-block";
+      document.querySelector(".DeleteButton").style.display = "none";
+    }
+
+    this.addLastchatListener();
+  }
+
+  // X TEST: RICHIEDE LA LISTA AL DB E LA METTE IN this.state.lista
+  showDB() {
+    let obj = {};
+    this.db.collection("user").get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+          obj[doc.id] = doc.data();
+      });
+      this.setState({lista: obj});
+    })
+  }
+
+  // -----------
+
   render() {
     this.access_info = queryString.parse(this.props.location.hash);
     return (
@@ -425,8 +415,6 @@ class Home extends Component {
           <input type="text" id="txtUser" placeholder="inserire username per test" onChange={this.onChange.bind(this)}></input>
           <br/>
           <button className="StampaButton" onClick={this.stampaDB.bind(this)} >Stampa DB</button>
-          <br/>
-          <button className="UpdateButtonTest" onClick={this.updateDB.bind(this)} >Update DB</button>
           <br/>
           <button className="DeleteButtonTest" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
           <br/>

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 
 class ViewsPage extends Component {
 
+  // CALCOLA PROPORZIONI FINESTRE E BOTTONI CHAT
   viewsSize() {
     console.log("viewsSize()");
     // Adatto le dimenzioni delle views e dei bottoni delle chat al loro numero
@@ -55,14 +56,14 @@ class ViewsPage extends Component {
     }
   }
 
-  // show the selected chat and hide the other
+  // MOSTRA LA CHAT SELEZIONATA E NASCONDE LE ALTRE
   chatClick(index, el) {
     let chats = document.querySelectorAll(".singleChat");
     document.querySelector(".selectedChat").classList.remove("selectedChat");
     document.getElementById('chat_embed_' + index).classList.add("selectedChat");
   }
 
-  // Funzione eseguita al click del bottone di apertura/chiusura chat
+  // MOSTRA O NASCONDE LE CHAT
   closeChat(el) {
     if(el.target.classList.contains("closeChat"))
     {
@@ -80,10 +81,12 @@ class ViewsPage extends Component {
     }
   }
 
+  // ELIMINA IL LISTENER SUL WINDOWS RESIZE
   removeListener() {
     window.removeEventListener("resize", this.viewsSizeBindato);
   }
 
+  // LANCIA LA FUNZIONE PER CALCOLARE LE PROPORZIONI E AGGIUNGE IL LISTENER SUL WINDOWS RESIZE
   componentDidMount () {
     if(document.querySelectorAll(".SingleView").length === 1)
       document.querySelector(".chatButtons").style.display = "none";
@@ -105,7 +108,6 @@ class ViewsPage extends Component {
     {
       streamers = this.props.path.split("/")
     }
-    console.log("streamers: ", streamers)
     /*if(streamers[streamers.length -1][0] === "#")*/
 
     /* Scorre l'arrey di streamer e aggiunge un "SingleView" ciascuno
