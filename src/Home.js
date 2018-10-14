@@ -179,7 +179,7 @@ class Home extends Component {
 
     // AGGIUNTI NICK RANDOM PER TESTARE CON PIù VISUALIZZAZIONI, DOVRA' MOSTRARE LA COOP
     // la seconda classe di el.target è il nome della coop
-    this.selectedStreaming = el.target.classList.item(1) + "/Gundul91/Ninja";
+    this.selectedStreaming = el.target.classList.item(1);
     let ref = ReactDOM.render(<ViewsPage path={this.selectedStreaming}/>, anteprima);
     anteprima.style.display = "block";
     document.querySelector(".cover").style.display = "block";
@@ -257,7 +257,17 @@ class Home extends Component {
             // Se c'è una richiesta di coop viene aggiunta alla chat
             if(da_leggere[us].richiesta) {
               let li = document.createElement("LI");
-              li.innerHTML = "bottone richiesta";
+              let btnAcc = document.createElement("button");
+              btnAcc.className = "accetta";
+              btnAcc.innerHTML = "Accetta";
+              btnAcc.onclick = function () {
+                // CREARE FUNZIONE CHE AGGIORNA IL DB AGGIUNGENDO IL RICHIEDENTE ALLA COOP
+              };
+              let btnRif = document.createElement("button");
+              btnRif.className = "rifiuta";
+              btnRif.innerHTML = "Rifiuta";
+              li.appendChild(btnAcc);
+              li.appendChild(btnRif);
               ul.appendChild(li);
             }
           });
@@ -265,7 +275,7 @@ class Home extends Component {
         } else {
           // Se la lista esiste aggiunge il messaggio ad essa
           let li = document.createElement("LI");
-          li.innerHTML = (da_leggere[us].richiesta) ? "bottone richiesta" : us + ": " + da_leggere[us].messaggio;
+          li.innerHTML = (da_leggere[us].richiesta) ? 'Vuole partecipare alla coop </br> <button class="accetta">Accetta</button> <button class="rifiuta">Rifiuta</button>' : us + ": " + da_leggere[us].messaggio;
           document.getElementById("lista_discussione_" + us).appendChild(li);
         }
       }
