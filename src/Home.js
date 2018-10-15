@@ -75,7 +75,8 @@ class Home extends Component {
       user_image: this.info_user.profile_image_url,
       stream_title: this.str_info.data[0].title,
       presenti: document.querySelector(".presenti").value,
-      necessari: document.querySelector(".necessari").value
+      necessari: document.querySelector(".necessari").value,
+      coop: []
     })
     .then(function(docRef) {
       document.querySelector(".AddButton").style.display = "none";
@@ -260,9 +261,25 @@ class Home extends Component {
               let btnAcc = document.createElement("button");
               btnAcc.className = "accetta";
               btnAcc.innerHTML = "Accetta";
-              btnAcc.onclick = function () {
-                // CREARE FUNZIONE CHE AGGIORNA IL DB AGGIUNGENDO IL RICHIEDENTE ALLA COOP
-              };
+              // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
+              btnAcc.onclick = function (e) {
+                this.db.collection("user").doc(this.info_user.login).get().then((querySnapshot) => {
+                  let coop = (querySnapshot.data()).coop || [];
+                  let presenti = parseInt((querySnapshot.data()).presenti) +  1;
+                  coop.push(us);
+                  this.db.collection("user").doc(this.info_user.login).update({
+                    presenti: presenti.toString(),
+                    coop: coop
+                  })
+                  .then(function(docRef) {
+                    e.path[2].removeChild(e.path[1]);
+                    // Cancellare richiesta da db e lista
+                  }.bind(this))
+                  .catch(function(error) {
+                    console.error("Error adding document: ", error);
+                  });
+                });
+              }.bind(this);
               let btnRif = document.createElement("button");
               btnRif.className = "rifiuta";
               btnRif.innerHTML = "Rifiuta";
@@ -322,12 +339,10 @@ class Home extends Component {
 
     // Aggiungo al DB il messaggio
     if(this.contatori[utente]){
-        console.log("esiste id: ",this.contatori[utente]);
         // Calcolo il valore da dare al contatore di questa chat che verrà usato come key del messaggio
         this.contatori[utente] = (this.contatori[utente][this.contatori[utente].length-1] === "9") ? (this.contatori[utente] + 1) : (parseInt(this.contatori[utente]) + 1).toString();
         this.aggiungi();
     } else {
-      console.log("non esiste id: ");
       this.contatori[utente] = 0;
       // Trovo l'ultima key dela chat e da questa calcolo la successiva
       this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
