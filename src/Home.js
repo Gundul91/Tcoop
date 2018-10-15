@@ -329,13 +329,10 @@ class Home extends Component {
     } else {
       console.log("non esiste id: ");
       this.contatori[utente] = 0;
-      // Scorro tutta la discussione per avere l'ultima key e da questa creare la successiva
-      // TROVARE SOLUZIONE MIGLIORE DI SCORRE TUTTO PER AVERE L'ULTIMA KEY
+      // Trovo l'ultima key dela chat e da questa calcolo la successiva
       this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          console.log("non esiste id: ",doc.id);
-          this.contatori[utente] = (doc.id[doc.id.length-1] === "9") ? doc.id + 1 : parseInt(doc.id) + 1;
-        });
+        let lastDocID = querySnapshot.docs[querySnapshot.docs.length - 1].id;
+        this.contatori[utente] = (lastDocID[lastDocID.length-1] === "9") ? lastDocID + 1 : parseInt(lastDocID) + 1;
         this.contatori[utente] = this.contatori[utente].toString();
         this.aggiungi();
       });
