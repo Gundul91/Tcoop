@@ -102,17 +102,19 @@ class Home extends Component {
     let objs = [];
     for (var key in this.state.lista) {
       let item = this.state.lista[key];
-      objs.push(<Streaming
-        game_name={item.game_name}
-        img_url={item.img_url}
-        language={item.language}
-        stream_title={item.stream_title}
-        user_image={item.user_image}
-        streamer_name={key}
-        presenti={item.presenti}
-        necessari={item.necessari}
-        mostraAnteprima={this.mostraAnteprima.bind(this)}
-      />);
+      // Se hanno già raggiunto il numero di necessari non vengono mostrati
+      if(item.presenti < item.necessari)
+        objs.push(<Streaming
+          game_name={item.game_name}
+          img_url={item.img_url}
+          language={item.language}
+          stream_title={item.stream_title}
+          user_image={item.user_image}
+          streamer_name={key}
+          presenti={item.presenti}
+          necessari={item.necessari}
+          mostraAnteprima={this.mostraAnteprima.bind(this)}
+        />);
     }
     return objs;
   }
@@ -178,36 +180,39 @@ class Home extends Component {
 
     let anteprima = document.querySelector(".anteprima");
 
-    // AGGIUNTI NICK RANDOM PER TESTARE CON PIù VISUALIZZAZIONI, DOVRA' MOSTRARE LA COOP
     // la seconda classe di el.target è il nome della coop
     this.selectedStreaming = el.target.classList.item(1);
-    let ref = ReactDOM.render(<ViewsPage path={this.selectedStreaming}/>, anteprima);
-    anteprima.style.display = "block";
-    document.querySelector(".cover").style.display = "block";
-    document.querySelector(".viewsPage").style.height = "100%";
-    document.querySelector(".videosContainer").style.height = "100%";
-    document.querySelector(".videosContainer").style.width = "100%";
-    document.querySelector(".chats").style.display = "none";
-    document.querySelector(".closeButton").style.display = "none";
-    document.querySelector(".partecipa").style.display = "block";
+    this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
+      // Se ci sono elementi nella coop li aggiungo all'anteprima
+      let path = querySnapshot.data().coop ? this.selectedStreaming + "/" + querySnapshot.data().coop.join("/") : this.selectedStreaming;
+      let ref = ReactDOM.render(<ViewsPage path={path}/>, anteprima);
+      anteprima.style.display = "block";
+      document.querySelector(".cover").style.display = "block";
+      document.querySelector(".viewsPage").style.height = "100%";
+      document.querySelector(".videosContainer").style.height = "100%";
+      document.querySelector(".videosContainer").style.width = "100%";
+      document.querySelector(".chats").style.display = "none";
+      document.querySelector(".closeButton").style.display = "none";
+      document.querySelector(".partecipa").style.display = "block";
 
-    //Scateno il resize per far calcolare le proporzioni delle views
-    window.dispatchEvent(new Event('resize'));
+      //Scateno il resize per far calcolare le proporzioni delle views
+      window.dispatchEvent(new Event('resize'));
 
-    document.addEventListener("click", function handler(event) {
+      document.addEventListener("click", function handler(event) {
 
-      // Se clicca sull'elemento / chat / bottone partecipa non succede nulla
-      if (event.target.closest(".anteprima") || event.target.closest(".partecipa") || event.target.closest(".Whisperers")) return;
+        // Se clicca sull'elemento / chat / bottone partecipa non succede nulla
+        if (event.target.closest(".anteprima") || event.target.closest(".partecipa") || event.target.closest(".Whisperers")) return;
 
-      // Se clicca fuori rimuovo l'anteprima
-      anteprima.style.display = "none";
-      document.querySelector(".cover").style.display = "none";
-      document.querySelector(".partecipa").style.display = "none";
-      // Rimuovo il listener per il resize della finestra
-      ref.removeListener();
-      ReactDOM.unmountComponentAtNode(anteprima);
-      // Rimuovo questo click event handler
-      event.currentTarget.removeEventListener(event.type, handler);
+        // Se clicca fuori rimuovo l'anteprima
+        anteprima.style.display = "none";
+        document.querySelector(".cover").style.display = "none";
+        document.querySelector(".partecipa").style.display = "none";
+        // Rimuovo il listener per il resize della finestra
+        ref.removeListener();
+        ReactDOM.unmountComponentAtNode(anteprima);
+        // Rimuovo questo click event handler
+        event.currentTarget.removeEventListener(event.type, handler);
+      });
     });
 
   }
