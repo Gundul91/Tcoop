@@ -19,6 +19,7 @@ class Home extends Component {
   }
 
   info_user = {}
+  giochi = {}
 
   // PRENDE I DATI DELL'UTENTE E SE E' LIVE MOSTRA LA SCHERMATA PER L'AGGIUNTA ALLA LISTA DI RICERCA COOP
   addToList() {
@@ -104,6 +105,7 @@ class Home extends Component {
       let item = this.state.lista[key];
       // Se hanno già raggiunto il numero di necessari non vengono mostrati
       if(item.presenti < item.necessari)
+      {
         objs.push(<Streaming
           game_name={item.game_name}
           img_url={item.img_url}
@@ -115,8 +117,26 @@ class Home extends Component {
           necessari={item.necessari}
           mostraAnteprima={this.mostraAnteprima.bind(this)}
         />);
+        this.giochi[item.game_name] = item.game_name;
+      }
     }
+    this.ripempi_giochi();
     return objs;
+  }
+
+  ripempi_giochi() {
+
+    // Mostra la lista solo quando non fa l'accesso a twitch RISOLVERE
+
+    console.log("ripempi_giochi()", this.giochi);
+    let divGiochi = document.querySelector(".giochi");
+    for(let key in this.giochi) {
+      let opt = document.createElement("option");
+      opt.value = key;
+      opt.innerHTML = key;
+      divGiochi.appendChild(opt);
+      console.log(opt);
+    }
   }
 
   // INIZIALIZZO IL COLLEGAMENTO CON IL DB DI FIREBASE
