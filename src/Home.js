@@ -16,7 +16,8 @@ require("firebase/firestore");
 class Home extends Component {
   state = {
     lista: {},
-    info_user: {}
+    info_user: {},
+    filtro: ""
   }
 
   giochi = []
@@ -104,7 +105,7 @@ class Home extends Component {
     for (var key in this.state.lista) {
       let item = this.state.lista[key];
       // Se hanno già raggiunto il numero di necessari non vengono mostrati
-      if(item.presenti < item.necessari)
+      if(item.presenti < item.necessari && (this.state.filtro === "" || this.state.filtro === item.game_name))
       {
         objs.push(<Streaming
           game_name={item.game_name}
@@ -129,16 +130,17 @@ class Home extends Component {
 
     // Mostra la lista solo quando non fa l'accesso a twitch RISOLVERE
 
-    console.log("ripempi_giochi()", this.giochi);
     let divGiochi = document.querySelector(".giochi");
-    console.log(divGiochi);
+    let opt = document.createElement("option");
+    opt.value = "";
+    opt.innerHTML = "No filter";
+    divGiochi.appendChild(opt);
     this.giochi.sort();
     for(let key in this.giochi) {
       let opt = document.createElement("option");
       opt.value = this.giochi[key];
       opt.innerHTML = this.giochi[key];
       divGiochi.appendChild(opt);
-      console.log(opt);
     }
   }
 
@@ -343,6 +345,11 @@ class Home extends Component {
     });
   }
 
+  // SALVA IL FILTRO SELEZIONATO E RIRENDERIZZA PER MOSTRARE SOLO GLI STREAMING FILTRATI
+  gameChange(el) {
+    this.setState({filtro: el.target.value});
+  }
+
   /* ESEGUITA ALLA APERTURA DI UNA CHAT PRIVATA
    * Cancella dal db i messaggi da leggere della chat che viene aperta
    */
@@ -478,7 +485,7 @@ class Home extends Component {
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
         <Whisperers sendMessage={this.sendMessage.bind(this)} msgClick={this.msgClick.bind(this)}/>
-        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)}/>
+        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} gameChange={this.gameChange.bind(this)}/>
         <div className="listaStreaming">
           {
             this.getList()
