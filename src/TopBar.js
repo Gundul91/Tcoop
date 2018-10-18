@@ -4,7 +4,7 @@ class TopBar extends Component {
 
   bar_content() {
     let info_user=this.props.info_user;
-    console.log("TopBar", this.props.userInList);
+    console.log("TopBar", info_user);
     if(info_user.id) {
       return (
         <div className="TopBar">

@@ -15,21 +15,21 @@ require("firebase/firestore");
 
 class Home extends Component {
   state = {
-    lista: {}
+    lista: {},
+    info_user: {}
   }
 
-  info_user = {}
-  giochi = {}
+  giochi = []
 
   // PRENDE I DATI DELL'UTENTE E SE E' LIVE MOSTRA LA SCHERMATA PER L'AGGIUNTA ALLA LISTA DI RICERCA COOP
   addToList() {
     // X TEST
     let testValue = document.getElementById('txtUser').value;
     if(testValue)
-      this.info_user.login = testValue
+      this.state.info_user.login = testValue
 
     // Richiedo info sullo streaming di chi ha fatto l'accesso nel sito
-    let url = "https://api.twitch.tv/helix/streams?user_login=" + this.info_user.login;
+    let url = "https://api.twitch.tv/helix/streams?user_login=" + this.state.info_user.login;
     fetch(url, {
       headers: {
         'Client-ID': "upk8rrcojp2raiw9pd2edhi0bvhze5"
@@ -69,11 +69,11 @@ class Home extends Component {
     if(document.getElementById('txtTitle').value !== '')
       this.str_info.data[0].title = document.getElementById('txtTitle').value;
 
-    this.db.collection("user").doc(this.info_user.login).set({
+    this.db.collection("user").doc(this.state.info_user.login).set({
       img_url: this.str_info.data[0].thumbnail_url,
       game_name: this.game_info.data[0].name,
       language: this.str_info.data[0].language,
-      user_image: this.info_user.profile_image_url,
+      user_image: this.state.info_user.profile_image_url,
       stream_title: this.str_info.data[0].title,
       presenti: document.querySelector(".presenti").value,
       necessari: document.querySelector(".necessari").value,
@@ -83,7 +83,7 @@ class Home extends Component {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
       document.querySelector(".InputAdd").style.display = "none";
-      this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista").set({});
+      this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista").set({});
     }.bind(this))
     .catch(function(error) {
       console.error("Error adding document: ", error);
@@ -92,7 +92,7 @@ class Home extends Component {
 
   // RIMMUOVE STREAMER DALLA LISTA DI RICERCA NEL DB
   deleteDB() {
-    this.db.collection('user').doc(this.info_user.login).delete();
+    this.db.collection('user').doc(this.state.info_user.login).delete();
     document.querySelector(".AddButton").style.display = "inline-block";
     document.querySelector(".DeleteButton").style.display = "none";
   }
@@ -117,10 +117,11 @@ class Home extends Component {
           necessari={item.necessari}
           mostraAnteprima={this.mostraAnteprima.bind(this)}
         />);
-        this.giochi[item.game_name] = item.game_name;
+        if(this.giochi.indexOf(item.game_name) === -1)
+          this.giochi.push(item.game_name)
       }
     }
-    this.ripempi_giochi();
+    //this.ripempi_giochi();
     return objs;
   }
 
@@ -130,10 +131,12 @@ class Home extends Component {
 
     console.log("ripempi_giochi()", this.giochi);
     let divGiochi = document.querySelector(".giochi");
+    console.log(divGiochi);
+    this.giochi.sort();
     for(let key in this.giochi) {
       let opt = document.createElement("option");
-      opt.value = key;
-      opt.innerHTML = key;
+      opt.value = this.giochi[key];
+      opt.innerHTML = this.giochi[key];
       divGiochi.appendChild(opt);
       console.log(opt);
     }
@@ -163,10 +166,8 @@ class Home extends Component {
     });
 
     this.showDB();
-  }
 
-  // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
-  componentDidMount() {
+    this.access_info = queryString.parse(this.props.location.hash);
     // Se è stato fatto l'accesso con twitch richiedo i dati dell'utente
     if(this.access_info.access_token !== undefined)
     {
@@ -179,16 +180,25 @@ class Home extends Component {
       .then(function(c) {
         return c.json()
       }).then(function(user) {
-        this.info_user = user.data[0];
-        console.log(this.info_user);
+        this.state.info_user = user.data[0];
         this.addLastchatListener();
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
         console.log('e', err);
       });
     }
+  }
 
+  // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
+  componentDidMount() {
+    this.setState({});
     this.contatori = {}; // Per MESSAGGI
+    this.ripempi_giochi();
+  }
 
+
+  // DOPO CHE LA PAGINA VIENE AGGIORNATA (SetState) RIEMPIO LA LISTA DI GIOCHI
+  componentDidUpdate() {
+    this.ripempi_giochi();
   }
 
   // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
@@ -239,8 +249,8 @@ class Home extends Component {
 
   // LISTENER SUL CAMBIO DELL'ELEMENTO "login + _last_chat" NEL DB
   addLastchatListener() {
-    console.log("login_listener: " + this.info_user.display_name);
-    this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
+    console.log("login_listener: " + this.state.info_user.display_name);
+    this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
     .onSnapshot(function(doc) {
       let da_leggere = doc.data();
       console.log("cambiato: ", da_leggere);
@@ -251,7 +261,7 @@ class Home extends Component {
         if(!document.getElementById("lista_discussione_" + us))
         {
           let button = document.createElement("BUTTON");
-          let dbRef = this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista");
+          let dbRef = this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista");
           button.innerHTML = us;
           button.style.backgroundColor = "red";
           button.onclick = function() {
@@ -271,7 +281,7 @@ class Home extends Component {
           let ul = document.createElement("UL");
           ul.id = "lista_discussione_" + us;
           ul.className = "whisp";
-          let stringa = this.info_user.display_name > us ? "chat_" + us + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + us;
+          let stringa = this.state.info_user.display_name > us ? "chat_" + us + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + us;
           this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
             // Scorre i messaggi del DB e li aggiunge alla lista
             querySnapshot.forEach((doc) => {
@@ -288,11 +298,11 @@ class Home extends Component {
               btnAcc.innerHTML = "Accetta";
               // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
               btnAcc.onclick = function (e) {
-                this.db.collection("user").doc(this.info_user.login).get().then((querySnapshot) => {
+                this.db.collection("user").doc(this.state.info_user.login).get().then((querySnapshot) => {
                   let coop = (querySnapshot.data()).coop || [];
                   let presenti = parseInt((querySnapshot.data()).presenti) +  1;
                   coop.push(us);
-                  this.db.collection("user").doc(this.info_user.login).update({
+                  this.db.collection("user").doc(this.state.info_user.login).update({
                     presenti: presenti.toString(),
                     coop: coop
                   })
@@ -329,7 +339,7 @@ class Home extends Component {
    */
   partecipa() {
     this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
-      [this.info_user.display_name]: {richiesta: true}
+      [this.state.info_user.display_name]: {richiesta: true}
     });
   }
 
@@ -340,7 +350,7 @@ class Home extends Component {
     let whispAperta = document.querySelector(".selectedWhisp");
     if(whispAperta) {
       // whispAperta.id.substring(18) prende solo la stringa dopo i primi 18 caratteri che contiene il nome dello streamer
-      this.db.collection("chat").doc(this.info_user.display_name).collection("messaggi_da_leggere").doc("lista").update({
+      this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista").update({
         [whispAperta.id.substring(18)]: firebase.firestore.FieldValue.delete()
       });
     }
@@ -354,11 +364,11 @@ class Home extends Component {
     let messaggio = document.getElementById('txtMessage').value;
 
     // Crea una stringa con i nick ordinati che indicherà la chat nel DB
-    let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
+    let stringa = this.state.info_user.display_name > utente ? "chat_" + utente + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + utente;
 
     // Aggiunge messaggio alla lista dei messaggi da leggere del ricevente
     this.db.collection("chat").doc(utente).collection("messaggi_da_leggere").doc("lista").update({
-      [this.info_user.display_name]: {messaggio: messaggio,
+      [this.state.info_user.display_name]: {messaggio: messaggio,
       randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
     });
 
@@ -384,10 +394,10 @@ class Home extends Component {
     let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
 
-    let stringa = this.info_user.display_name > utente ? "chat_" + utente + "_" + this.info_user.display_name : "chat_" + this.info_user.display_name + "_" + utente;
+    let stringa = this.state.info_user.display_name > utente ? "chat_" + utente + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + utente;
     this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc(this.contatori[utente]).set({
       mess: messaggio,
-      users: this.info_user.display_name
+      users: this.state.info_user.display_name
     })
     .then(() => {
       // Aggiunge il messaggio alla lista nella finestra
@@ -398,12 +408,23 @@ class Home extends Component {
         document.getElementById('discussione').appendChild(ul);
       }
       let li = document.createElement("LI");
-      li.innerHTML = this.info_user.display_name + ": " + messaggio;
+      li.innerHTML = this.state.info_user.display_name + ": " + messaggio;
       document.getElementById("lista_discussione_" + utente).appendChild(li);
     })
     .catch(function(error) {
       console.error("Error adding document: ", error);
     });
+  }
+
+  // RICHIEDE LA LISTA AL DB E LA METTE IN this.state.lista
+  showDB() {
+    let obj = {};
+    this.db.collection("user").get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+          obj[doc.id] = doc.data();
+      });
+      this.setState({lista: obj});
+    })
   }
 
   // ----- TEST -----
@@ -419,9 +440,9 @@ class Home extends Component {
 
   // X TEST: EVENTO CAMBIO TESTO NEL TEXTBOX DI TEST
   onChange() {
-    this.info_user.display_name = document.getElementById('txtUser').value;
-    this.info_user.login = this.info_user.display_name;
-    if(this.state.lista[this.info_user.login])
+    this.state.info_user.display_name = document.getElementById('txtUser').value;
+    this.state.info_user.login = this.state.info_user.display_name;
+    if(this.state.lista[this.state.info_user.login])
     {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
@@ -433,21 +454,10 @@ class Home extends Component {
     this.addLastchatListener();
   }
 
-  // X TEST: RICHIEDE LA LISTA AL DB E LA METTE IN this.state.lista
-  showDB() {
-    let obj = {};
-    this.db.collection("user").get().then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-          obj[doc.id] = doc.data();
-      });
-      this.setState({lista: obj});
-    })
-  }
-
   // -----------
 
   render() {
-    this.access_info = queryString.parse(this.props.location.hash);
+    console.log("RENDERIZZA")
     return (
       <div className="Home">
         <div className="anteprima"></div>
@@ -468,7 +478,7 @@ class Home extends Component {
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
         <Whisperers sendMessage={this.sendMessage.bind(this)} msgClick={this.msgClick.bind(this)}/>
-        <TopBar info_user={this.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} userInList={this.state.lista[this.info_user.login]}/>
+        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)}/>
         <div className="listaStreaming">
           {
             this.getList()
