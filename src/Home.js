@@ -16,8 +16,7 @@ require("firebase/firestore");
 class Home extends Component {
   state = {
     lista: {},
-    info_user: {},
-    filtro: ""
+    info_user: {}
   }
 
   giochi = []
@@ -192,7 +191,7 @@ class Home extends Component {
 
   // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
   componentDidMount() {
-    this.setState({});
+    this.setState({filtro: ""});
     this.contatori = {}; // Per MESSAGGI
     this.ripempi_giochi();
   }
@@ -200,7 +199,8 @@ class Home extends Component {
 
   // DOPO CHE LA PAGINA VIENE AGGIORNATA (SetState) RIEMPIO LA LISTA DI GIOCHI
   componentDidUpdate() {
-    this.ripempi_giochi();
+    if(!this.state.filtro)
+      this.ripempi_giochi();
   }
 
   // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
