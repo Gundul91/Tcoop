@@ -16,10 +16,9 @@ require("firebase/firestore");
 class Home extends Component {
   state = {
     lista: {},
-    info_user: {}
+    info_user: {},
+    giochi: []
   }
-
-  giochi = []
 
   // PRENDE I DATI DELL'UTENTE E SE E' LIVE MOSTRA LA SCHERMATA PER L'AGGIUNTA ALLA LISTA DI RICERCA COOP
   addToList() {
@@ -104,7 +103,7 @@ class Home extends Component {
     for (var key in this.state.lista) {
       let item = this.state.lista[key];
       // Se hanno già raggiunto il numero di necessari non vengono mostrati
-      if(item.presenti < item.necessari && (this.state.filtro === "" || this.state.filtro === item.game_name))
+      if(item.presenti < item.necessari && (this.state.filtro === undefined || this.state.filtro === "" || this.state.filtro === item.game_name))
       {
         objs.push(<Streaming
           game_name={item.game_name}
@@ -117,11 +116,14 @@ class Home extends Component {
           necessari={item.necessari}
           mostraAnteprima={this.mostraAnteprima.bind(this)}
         />);
-        if(this.giochi.indexOf(item.game_name) === -1)
-          this.giochi.push(item.game_name)
+        if(this.state.giochi.indexOf(item.game_name) === -1)
+          this.state.giochi.push(item.game_name)
       }
     }
-    //this.ripempi_giochi();
+    if(this.state.filtro === undefined && document.querySelector(".giochi") && this.state.giochi.length > 1)
+    {
+      this.ripempi_giochi();
+    }
     return objs;
   }
 
@@ -134,11 +136,12 @@ class Home extends Component {
     opt.value = "";
     opt.innerHTML = "No filter";
     divGiochi.appendChild(opt);
-    this.giochi.sort();
-    for(let key in this.giochi) {
+    this.state.giochi.sort();
+    this.state.filtro = "";
+    for(let key in this.state.giochi) {
       let opt = document.createElement("option");
-      opt.value = this.giochi[key];
-      opt.innerHTML = this.giochi[key];
+      opt.value = this.state.giochi[key];
+      opt.innerHTML = this.state.giochi[key];
       divGiochi.appendChild(opt);
     }
   }
@@ -191,16 +194,15 @@ class Home extends Component {
 
   // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
   componentDidMount() {
-    this.setState({filtro: ""});
+    this.setState({});
     this.contatori = {}; // Per MESSAGGI
-    this.ripempi_giochi();
   }
 
 
   // DOPO CHE LA PAGINA VIENE AGGIORNATA (SetState) RIEMPIO LA LISTA DI GIOCHI
   componentDidUpdate() {
-    if(!this.state.filtro)
-      this.ripempi_giochi();
+    console.log("aggiunge filtri", this.state.filtro);
+
   }
 
   // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
