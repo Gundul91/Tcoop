@@ -120,30 +120,35 @@ class Home extends Component {
           this.state.giochi.push(item.game_name)
       }
     }
-    if(this.state.filtro === undefined && document.querySelector(".giochi") && this.state.giochi.length > 1)
+    // RIEMPIO LA LISTA DEL FILTRO DI GIOCHI
+    if(document.querySelector(".giochi") && this.state.giochi.length > 1)
     {
-      this.ripempi_giochi();
+      this.riempi_giochi();
     }
     return objs;
   }
 
-  ripempi_giochi() {
-
-    // Mostra la lista solo quando non fa l'accesso a twitch RISOLVERE
-
+  riempi_giochi() {
     let divGiochi = document.querySelector(".giochi");
+    divGiochi.innerHTML = "";
+    console.log("riempi_giochi", divGiochi, this.state.giochi);
     let opt = document.createElement("option");
+    opt.disabled = "disabled";
+    opt.selected = "selected";
+    opt.innerHTML = "Filters";
+    divGiochi.appendChild(opt);
+    opt = document.createElement("option");
     opt.value = "";
     opt.innerHTML = "No filter";
     divGiochi.appendChild(opt);
     this.state.giochi.sort();
-    this.state.filtro = "";
     for(let key in this.state.giochi) {
-      let opt = document.createElement("option");
+      opt = document.createElement("option");
       opt.value = this.state.giochi[key];
       opt.innerHTML = this.state.giochi[key];
       divGiochi.appendChild(opt);
     }
+    this.state.filtro = "";
   }
 
   // INIZIALIZZO IL COLLEGAMENTO CON IL DB DI FIREBASE
@@ -198,11 +203,8 @@ class Home extends Component {
     this.contatori = {}; // Per MESSAGGI
   }
 
-
-  // DOPO CHE LA PAGINA VIENE AGGIORNATA (SetState) RIEMPIO LA LISTA DI GIOCHI
   componentDidUpdate() {
-    console.log("aggiunge filtri", this.state.filtro);
-
+    this.riempi_giochi();
   }
 
   // MOSTRA LA SCHERMATA DELL'ANTEPRIMA DELLA COOP SELEZIONATA
@@ -487,7 +489,7 @@ class Home extends Component {
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
         <Whisperers sendMessage={this.sendMessage.bind(this)} msgClick={this.msgClick.bind(this)}/>
-        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} gameChange={this.gameChange.bind(this)}/>
+        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} gameChange={this.gameChange.bind(this)} riempi_giochi={this.riempi_giochi.bind(this)}/>
         <div className="listaStreaming">
           {
             this.getList()

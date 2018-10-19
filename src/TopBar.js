@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 
 class TopBar extends Component {
 
+  componentDidMount() {
+    this.props.riempi_giochi();
+  }
+
   bar_content() {
     let info_user=this.props.info_user;
     console.log("TopBar", info_user);
