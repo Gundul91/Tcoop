@@ -128,21 +128,24 @@ class Home extends Component {
     return objs;
   }
 
+  // RIEMPIE LA LISTA DI FILTRI CON I NOMI DEI GIOCHI DEI VARI STREAMING
   riempi_giochi() {
     let divGiochi = document.querySelector(".giochi");
     divGiochi.innerHTML = "";
-    console.log("riempi_giochi", divGiochi, this.state.giochi);
     let opt = document.createElement("option");
+    // Aggiungo un primo elemento non selezionabile che farà da placeholder
     opt.disabled = "disabled";
     opt.selected = "selected";
     opt.innerHTML = "Filters";
     opt.style.display = "none";
     divGiochi.appendChild(opt);
     opt = document.createElement("option");
+    // Aggiungo un elemento che farà da "no filtri"
     opt.value = "";
     opt.innerHTML = "No filter";
     divGiochi.appendChild(opt);
     this.state.giochi.sort();
+    // Per ogni gioco aggiungo una opzione allelemento select
     for(let key in this.state.giochi) {
       opt = document.createElement("option");
       opt.value = this.state.giochi[key];
@@ -232,7 +235,10 @@ class Home extends Component {
       document.querySelector(".videosContainer").style.width = "100%";
       document.querySelector(".chats").style.display = "none";
       document.querySelector(".closeButton").style.display = "none";
-      document.querySelector(".partecipa").style.display = "block";
+      let part = document.querySelector(".partecipa");
+      part.style.display = "block";
+      part.disabled = false;
+      part.innerHtml = "PARTECIPA!";
 
       //Scateno il resize per far calcolare le proporzioni delle views
       window.dispatchEvent(new Event('resize'));
@@ -347,8 +353,19 @@ class Home extends Component {
    * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
    */
   partecipa() {
-    this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
-      [this.state.info_user.display_name]: {richiesta: true}
+    this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
+      let info = querySnapshot.data();
+      // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
+      if(info.presenti < info.necessari)
+      {
+        this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
+          [this.state.info_user.display_name]: {richiesta: true}
+        });
+      } else {
+        let btn = document.querySelector(".partecipa");
+        btn.disabled = true;
+        btn.innerHTML = "Non ci sono più posti";
+      }
     });
   }
 
