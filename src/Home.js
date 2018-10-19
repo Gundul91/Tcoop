@@ -136,6 +136,7 @@ class Home extends Component {
     opt.disabled = "disabled";
     opt.selected = "selected";
     opt.innerHTML = "Filters";
+    opt.style.display = "none";
     divGiochi.appendChild(opt);
     opt = document.createElement("option");
     opt.value = "";
@@ -191,6 +192,8 @@ class Home extends Component {
       }).then(function(user) {
         this.state.info_user = user.data[0];
         this.addLastchatListener();
+        // Renderizzo per i casi in cui la promis si concluda troppo tardi
+        this.setState({});
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
         console.log('e', err);
       });
