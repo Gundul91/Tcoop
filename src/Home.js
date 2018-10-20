@@ -17,7 +17,9 @@ class Home extends Component {
   state = {
     lista: {},
     info_user: {},
-    giochi: []
+    giochi: [],
+    richiesta_effettuata: false,
+    DbUserInfo: {}
   }
 
   // PRENDE I DATI DELL'UTENTE E SE E' LIVE MOSTRA LA SCHERMATA PER L'AGGIUNTA ALLA LISTA DI RICERCA COOP
@@ -64,7 +66,7 @@ class Home extends Component {
   /* AGGIUNGE L'USER AL DB
    * Viene eseguito quando l'utente clicca di aggiungersi al DB nella finestra InputAdd
    */
-  addToBD() {
+  addToDB() {
     if(document.getElementById('txtTitle').value !== '')
       this.str_info.data[0].title = document.getElementById('txtTitle').value;
 
@@ -76,7 +78,8 @@ class Home extends Component {
       stream_title: this.str_info.data[0].title,
       presenti: document.querySelector(".presenti").value,
       necessari: document.querySelector(".necessari").value,
-      coop: []
+      coop: [],
+      richiesta_coop: false
     })
     .then(function(docRef) {
       document.querySelector(".AddButton").style.display = "none";
@@ -194,6 +197,7 @@ class Home extends Component {
         return c.json()
       }).then(function(user) {
         this.state.info_user = user.data[0];
+        this.state.richiesta_effettuata = this.state.DbUserInfo.richiesta_coop;
         this.addLastchatListener();
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
         this.setState({});
@@ -264,6 +268,9 @@ class Home extends Component {
 
   // LISTENER SUL CAMBIO DELL'ELEMENTO "login + _last_chat" NEL DB
   addLastchatListener() {
+    this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
+      this.state.DbUserInfo = (querySnapshot.data());
+    });
     console.log("login_listener: " + this.state.info_user.display_name);
     this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
     .onSnapshot(function(doc) {
@@ -311,28 +318,35 @@ class Home extends Component {
               let btnAcc = document.createElement("button");
               btnAcc.className = "accetta";
               btnAcc.innerHTML = "Accetta";
+              let btnRif = document.createElement("button");
+              btnRif.className = "rifiuta";
+              btnRif.innerHTML = "Rifiuta";
               // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
               btnAcc.onclick = function (e) {
-                this.db.collection("user").doc(this.state.info_user.login).get().then((querySnapshot) => {
+                this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
                   let coop = (querySnapshot.data()).coop || [];
                   let presenti = parseInt((querySnapshot.data()).presenti) +  1;
                   coop.push(us);
-                  this.db.collection("user").doc(this.state.info_user.login).update({
+                  this.db.collection("user").doc(this.state.info_user.display_name).update({
                     presenti: presenti.toString(),
                     coop: coop
                   })
                   .then(function(docRef) {
                     e.path[2].removeChild(e.path[1]);
-                    // Cancellare richiesta da db e lista
                   }.bind(this))
                   .catch(function(error) {
                     console.error("Error adding document: ", error);
                   });
                 });
+                this.nascondiBottoni(btnAcc, btnRif);
               }.bind(this);
-              let btnRif = document.createElement("button");
-              btnRif.className = "rifiuta";
-              btnRif.innerHTML = "Rifiuta";
+              btnRif.onclick = function (e) {
+                this.db.collection("chat").doc(us).collection("messaggi_da_leggere").doc("lista").update({
+                  [this.state.info_user.display_name]: {messaggio: "La richiesta è stata rifiutata",
+                  randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
+                });
+                this.nascondiBottoni(btnAcc, btnRif);
+              }.bind(this);
               li.appendChild(btnAcc);
               li.appendChild(btnRif);
               ul.appendChild(li);
@@ -349,6 +363,11 @@ class Home extends Component {
     }.bind(this));
   }
 
+  nascondiBottoni(btnAcc, btnRif) {
+    btnAcc.style.display = "none";
+    btnRif.style.display = "none";
+  }
+
   /* MANDA RICHIESTA DI PARTECIPAZIONE ALLA COOP
    * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
    */
@@ -358,13 +377,19 @@ class Home extends Component {
       // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
       if(info.presenti < info.necessari)
       {
-        this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
-          [this.state.info_user.display_name]: {richiesta: true}
-        });
+        if(!this.state.richiesta_effettuata)
+        {
+          this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
+            [this.state.info_user.display_name]: {richiesta: true}
+          });
+          this.state.richiesta_effettuata = true;
+          this.db.collection("user").doc(this.state.info_user.display_name).update({
+            richiesta_coop: true });
+        } else {
+          alert("C'è già una richiesta in attesa");
+        }
       } else {
-        let btn = document.querySelector(".partecipa");
-        btn.disabled = true;
-        btn.innerHTML = "Non ci sono più posti";
+        alert("Non ci sono più posti");
       }
     });
   }
@@ -494,7 +519,7 @@ class Home extends Component {
         <div className="anteprima"></div>
         <div className="cover"></div>
         <button className="partecipa" onClick={this.partecipa.bind(this)}>PARTECIPA!</button>
-        <InputAdd addToBD={this.addToBD.bind(this)}/>
+        <InputAdd addToDB={this.addToDB.bind(this)}/>
         <div className="boxTest">
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
           <br/>
