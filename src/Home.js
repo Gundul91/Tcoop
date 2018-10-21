@@ -18,7 +18,6 @@ class Home extends Component {
     lista: {},
     info_user: {},
     giochi: [],
-    richiesta_effettuata: false,
     DbUserInfo: {}
   }
 
@@ -197,7 +196,6 @@ class Home extends Component {
         return c.json()
       }).then(function(user) {
         this.state.info_user = user.data[0];
-        this.state.richiesta_effettuata = this.state.DbUserInfo.richiesta_coop;
         this.addLastchatListener();
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
         this.setState({});
@@ -372,24 +370,25 @@ class Home extends Component {
    * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
    */
   partecipa() {
-    this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
-      let info = querySnapshot.data();
-      // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
-      if(info.presenti < info.necessari)
+    this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
+      if(!querySnapshot.data().richiesta_coop)
       {
-        if(!this.state.richiesta_effettuata)
-        {
-          this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
-            [this.state.info_user.display_name]: {richiesta: true}
-          });
-          this.state.richiesta_effettuata = true;
-          this.db.collection("user").doc(this.state.info_user.display_name).update({
-            richiesta_coop: true });
-        } else {
-          alert("C'è già una richiesta in attesa");
-        }
+        this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
+          let info = querySnapshot.data();
+          // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
+          if(info.presenti < info.necessari)
+          {
+            this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
+              [this.state.info_user.display_name]: {richiesta: true}
+            });
+            this.db.collection("user").doc(this.state.info_user.display_name).update({
+              richiesta_coop: true });
+          } else {
+            alert("Non ci sono più posti");
+          }
+        });
       } else {
-        alert("Non ci sono più posti");
+        alert("C'è già una richiesta in attesa");
       }
     });
   }
