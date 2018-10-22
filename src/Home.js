@@ -15,6 +15,7 @@ require("firebase/firestore");
 
 class Home extends Component {
   state = {
+    temp: true,
     lista: {},
     info_user: {},
     giochi: [],
@@ -183,8 +184,20 @@ class Home extends Component {
     this.showDB();
 
     this.access_info = queryString.parse(this.props.location.hash);
-    // Se è stato fatto l'accesso con twitch richiedo i dati dell'utente
-    if(this.access_info.access_token !== undefined)
+
+    // Rimmuovo l'hash dall'url
+    this.props.history.push('/');
+    /* Se ci sono dati nella cash usa quelli, altrimenti,
+     * se è stato fatto l'accesso con twitch, richiedo i dati dell'utente
+     */
+    if(localStorage.getItem("info_user")){
+      this.state.info_user = JSON.parse(localStorage.getItem("info_user"));
+      // Utile solo con i TEST
+      if(localStorage.getItem("display_name"))
+      {
+        this.state.info_user.display_name = localStorage.getItem("display_name");
+      }
+    } else if(this.access_info.access_token !== undefined)
     {
       let auth = "Bearer " +  this.access_info.access_token
       fetch("https://api.twitch.tv/helix/users", {
@@ -197,6 +210,9 @@ class Home extends Component {
       }).then(function(user) {
         this.state.info_user = user.data[0];
         this.addLastchatListener();
+        // Non si possono salvare oggetti in localStorage, è necessario convertirli in stringa
+        localStorage.setItem("info_user", JSON.stringify(this.state.info_user));
+        console.log("setItem", this.state.info_user);
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
         this.setState({});
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
@@ -209,6 +225,10 @@ class Home extends Component {
   componentDidMount() {
     this.setState({});
     this.contatori = {}; // Per MESSAGGI
+
+    // X TEST
+    document.getElementById('txtUser').value = this.state.info_user.display_name;
+    console.log("state", this.state);
   }
 
   componentDidUpdate() {
@@ -411,6 +431,15 @@ class Home extends Component {
     }
   }
 
+  /* EFFETTUA IL LOGOUT DAL SITO
+   * Cancella i dati dalla cash e dallo state, quindi renderizza nuovamente la pagina
+   */
+  logout () {
+    console.log("logout");
+    localStorage.clear();
+    this.setState({info_user: {}});
+  }
+
   /* WHISPER */
 
   // INVIO MESSAGGIO PRIVATO
@@ -497,6 +526,7 @@ class Home extends Component {
   onChange() {
     this.state.info_user.display_name = document.getElementById('txtUser').value;
     this.state.info_user.login = this.state.info_user.display_name;
+    localStorage.setItem("display_name", this.state.info_user.display_name);
     if(this.state.lista[this.state.info_user.login])
     {
       document.querySelector(".AddButton").style.display = "none";
@@ -533,7 +563,8 @@ class Home extends Component {
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
         <Whisperers sendMessage={this.sendMessage.bind(this)} msgClick={this.msgClick.bind(this)}/>
-        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)} gameChange={this.gameChange.bind(this)} riempi_giochi={this.riempi_giochi.bind(this)}/>
+        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)}
+        gameChange={this.gameChange.bind(this)} riempi_giochi={this.riempi_giochi.bind(this)} logout={this.logout.bind(this)}/>
         <div className="listaStreaming">
           {
             this.getList()
