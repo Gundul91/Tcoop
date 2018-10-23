@@ -37,7 +37,7 @@ class InputAdd extends Component {
           <option value="5">5</option>
           <option value="6">6</option>
         </select><br/>
-        <button className="AddInfoButton" onClick={this.props.addToBD}>Aggiunti alla lista</button>
+        <button className="AddInfoButton" onClick={this.props.addToDB}>Aggiunti alla lista</button>
       </div>
     )
   }

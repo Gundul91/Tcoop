@@ -14,7 +14,7 @@ class TopBar extends Component {
         <div className="TopBar">
           <img className="userImage" src={info_user.profile_image_url}/>
           <button className="AddButton" onClick={this.props.addToList} >Aggiungiti alla lista</button>
-          <button className="DeleteButton" onClick={this.props.deleteDB} >Rimmuoviti dalla lista</button>
+          <button className="DeleteButton" onClick={this.props.removeList} >Rimmuoviti dalla lista</button>
           <select className="giochi" onChange={this.props.gameChange} ></select>
           <button className="logoutButton" onClick={this.props.logout} >Logout</button>
         </div>

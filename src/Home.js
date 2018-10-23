@@ -79,24 +79,43 @@ class Home extends Component {
       presenti: document.querySelector(".presenti").value,
       necessari: document.querySelector(".necessari").value,
       coop: [],
-      richiesta_coop: false
+      richiesta_coop: false,
+      nome_coop: this.state.info_user.display_name
     })
     .then(function(docRef) {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
       document.querySelector(".InputAdd").style.display = "none";
       this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista").set({});
+      // Listener per cambiamento di nome_coop
+      this.db.collection("user").doc(this.state.info_user.display_name)
+      .onSnapshot(function(doc) {
+        if((doc.data()).nome_coop)
+        {
+          alert("Sei stato accettato!");
+        }
+      });
     }.bind(this))
     .catch(function(error) {
       console.error("Error adding document: ", error);
     });
   }
 
+  // IMPOSTA LA BARRA PER CHI NON è IN LISTA
+  removeList() {
+    document.querySelector(".AddButton").style.display = "inline-block";
+    document.querySelector(".DeleteButton").style.display = "none";
+    this.deleteDB();
+  }
+
   // RIMMUOVE STREAMER DALLA LISTA DI RICERCA NEL DB
   deleteDB() {
     this.db.collection('user').doc(this.state.info_user.login).delete();
-    document.querySelector(".AddButton").style.display = "inline-block";
-    document.querySelector(".DeleteButton").style.display = "none";
+  }
+
+  // RIMMUOVE user DALLA LISTA DI RICERCA NEL DB
+  deleteUserDB(user) {
+    this.db.collection('user').doc(user).delete();
   }
 
   // RESTITUISCE LA LISTA DI ELEMENTI <Streaming> CONTENENTI LE INFO DI CHI CERCA COOP
@@ -212,7 +231,6 @@ class Home extends Component {
         this.addLastchatListener();
         // Non si possono salvare oggetti in localStorage, è necessario convertirli in stringa
         localStorage.setItem("info_user", JSON.stringify(this.state.info_user));
-        console.log("setItem", this.state.info_user);
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
         this.setState({});
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
@@ -228,7 +246,6 @@ class Home extends Component {
 
     // X TEST
     document.getElementById('txtUser').value = this.state.info_user.display_name;
-    console.log("state", this.state);
   }
 
   componentDidUpdate() {
@@ -350,20 +367,34 @@ class Home extends Component {
                     coop: coop
                   })
                   .then(function(docRef) {
+                    // Rimmuove i bottoni accetta/rifiuta dalla chat
                     e.path[2].removeChild(e.path[1]);
+                    this.db.collection("user").doc(us).get().then((querySnapshot) => {
+                      if((querySnapshot.data()).nome_coop === us)
+                      {
+                        this.db.collection("user").doc(us).update({nome_coop: this.state.info_user.display_name});
+                        this.deleteUserDB(us);
+                      } else {
+                        // Se la persona ha già trovato una coop indicare allo streamer che ormai non è più disponibile
+                      }
+                    });
                   }.bind(this))
                   .catch(function(error) {
                     console.error("Error adding document: ", error);
                   });
                 });
-                this.nascondiBottoni(btnAcc, btnRif);
               }.bind(this);
               btnRif.onclick = function (e) {
                 this.db.collection("chat").doc(us).collection("messaggi_da_leggere").doc("lista").update({
                   [this.state.info_user.display_name]: {messaggio: "La richiesta è stata rifiutata",
                   randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
-                });
-                this.nascondiBottoni(btnAcc, btnRif);
+                })
+                .then(function(docRef) {
+                  this.db.collection("user").doc(us).update({
+                    richiesta_coop: false });
+                  // Rimmuove i bottoni accetta/rifiuta dalla chat
+                  e.path[2].removeChild(e.path[1]);
+                }.bind(this));
               }.bind(this);
               li.appendChild(btnAcc);
               li.appendChild(btnRif);
@@ -381,34 +412,34 @@ class Home extends Component {
     }.bind(this));
   }
 
-  nascondiBottoni(btnAcc, btnRif) {
-    btnAcc.style.display = "none";
-    btnRif.style.display = "none";
-  }
-
   /* MANDA RICHIESTA DI PARTECIPAZIONE ALLA COOP
    * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
    */
   partecipa() {
     this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-      if(!querySnapshot.data().richiesta_coop)
+      if(querySnapshot.data().nome_coop === this.state.info_user.display_name)
       {
-        this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
-          let info = querySnapshot.data();
-          // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
-          if(info.presenti < info.necessari)
-          {
-            this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
-              [this.state.info_user.display_name]: {richiesta: true}
-            });
-            this.db.collection("user").doc(this.state.info_user.display_name).update({
-              richiesta_coop: true });
-          } else {
-            alert("Non ci sono più posti");
-          }
-        });
+        if(!querySnapshot.data().richiesta_coop)
+        {
+          this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
+            let info = querySnapshot.data();
+            // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
+            if(info.presenti < info.necessari)
+            {
+              this.db.collection("chat").doc(this.selectedStreaming).collection("messaggi_da_leggere").doc("lista").update({
+                [this.state.info_user.display_name]: {richiesta: true}
+              });
+              this.db.collection("user").doc(this.state.info_user.display_name).update({
+                richiesta_coop: true });
+            } else {
+              alert("Non ci sono più posti");
+            }
+          });
+        } else {
+          alert("C'è già una richiesta in attesa");
+        }
       } else {
-        alert("C'è già una richiesta in attesa");
+        alert("Non puoi richiedere di partecipare se sei già in una coop");
       }
     });
   }
@@ -465,7 +496,7 @@ class Home extends Component {
       this.contatori[utente] = 0;
       // Trovo l'ultima key dela chat e da questa calcolo la successiva
       this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
-        let lastDocID = querySnapshot.docs[querySnapshot.docs.length - 1].id;
+        let lastDocID = (querySnapshot.docs.length > 0) ? querySnapshot.docs[querySnapshot.docs.length - 1].id : -1;
         this.contatori[utente] = (lastDocID[lastDocID.length-1] === "9") ? lastDocID + 1 : parseInt(lastDocID) + 1;
         this.contatori[utente] = this.contatori[utente].toString();
         this.aggiungi();
@@ -558,12 +589,12 @@ class Home extends Component {
           <br/>
           <button className="StampaButton" onClick={this.stampaDB.bind(this)} >Stampa DB</button>
           <br/>
-          <button className="DeleteButtonTest" onClick={this.deleteDB.bind(this)} >Rimmuoviti dalla lista</button>
+          <button className="DeleteButtonTest" onClick={this.removeList.bind(this)} >Rimmuoviti dalla lista</button>
           <br/>
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
         <Whisperers sendMessage={this.sendMessage.bind(this)} msgClick={this.msgClick.bind(this)}/>
-        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} deleteDB={this.deleteDB.bind(this)}
+        <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} removeList={this.removeList.bind(this)}
         gameChange={this.gameChange.bind(this)} riempi_giochi={this.riempi_giochi.bind(this)} logout={this.logout.bind(this)}/>
         <div className="listaStreaming">
           {
