@@ -80,7 +80,7 @@ class Home extends Component {
         presenti: document.querySelector(".presenti").value,
         necessari: document.querySelector(".necessari").value
       }
-    })
+    }, {merge: true})
     .then(function(docRef) {
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
@@ -398,7 +398,7 @@ class Home extends Component {
                     this.db.collection("user").doc(us).get().then((querySnapshot) => {
                       if((querySnapshot.data()).coop.nome_coop === us)
                       {
-                        this.db.collection("user").doc(us).update({nome_coop: this.state.info_user.display_name});
+                        this.db.collection("user").doc(us).update({"coop.nome_coop": this.state.info_user.display_name});
                         this.deleteUserDB(us);
                       } else {
                         // Se la persona ha già trovato una coop indicare allo streamer che ormai non è più disponibile
