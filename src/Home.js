@@ -89,11 +89,13 @@ class Home extends Component {
       // Listener per cambiamento di nome_coop
       this.db.collection("user").doc(this.state.info_user.display_name)
       .onSnapshot(function(doc) {
-        if((doc.data()).coop.nome_coop)
+        if((doc.data()).coop && (doc.data()).coop.nome_coop !== this.state.info_user.display_name)
         {
           alert("Sei stato accettato!");
         }
-      });
+      }.bind(this));
+      // this.setCoop(); DOVREBBE POTERSI TOGLIERE NEL PROGETTO FINALE
+      this.setCoop();
     }.bind(this))
     .catch(function(error) {
       console.error("Error adding document: ", error);
@@ -246,7 +248,8 @@ class Home extends Component {
   setCoop() {
 
     this.db.collection("user").doc(this.state.info_user.login).get().then((doc) => {
-      if(!doc.data())
+      console.log("!doc.data()",!doc.data());
+      if(doc.data() && !(doc.data()).coop)
       {
         this.db.collection("user").doc(this.state.info_user.login).set({
           coop: {
@@ -254,7 +257,7 @@ class Home extends Component {
             richiesta_coop: false,
             nome_coop: this.state.info_user.display_name
           }
-        })
+        },{merge: true})
         .catch(function(error) {
           console.error("Error adding document: ", error);
         });
@@ -455,10 +458,6 @@ class Home extends Component {
               });
               this.db.collection("user").doc(this.state.info_user.display_name).update({
                 "coop.richiesta_coop": true
-              }).then(() => {
-                this.db.collection("user").doc(this.state.info_user.display_name).set({
-                  coop: {nome: "neeee", nome_coop: "niiii"}}
-                );
               });
             } else {
               alert("Non ci sono più posti");
