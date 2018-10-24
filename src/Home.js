@@ -71,16 +71,15 @@ class Home extends Component {
       this.str_info.data[0].title = document.getElementById('txtTitle').value;
 
     this.db.collection("user").doc(this.state.info_user.login).set({
-      img_url: this.str_info.data[0].thumbnail_url,
-      game_name: this.game_info.data[0].name,
-      language: this.str_info.data[0].language,
-      user_image: this.state.info_user.profile_image_url,
-      stream_title: this.str_info.data[0].title,
-      presenti: document.querySelector(".presenti").value,
-      necessari: document.querySelector(".necessari").value,
-      coop: [],
-      richiesta_coop: false,
-      nome_coop: this.state.info_user.display_name
+      info: {
+        img_url: this.str_info.data[0].thumbnail_url,
+        game_name: this.game_info.data[0].name,
+        language: this.str_info.data[0].language,
+        user_image: this.state.info_user.profile_image_url,
+        stream_title: this.str_info.data[0].title,
+        presenti: document.querySelector(".presenti").value,
+        necessari: document.querySelector(".necessari").value
+      }
     })
     .then(function(docRef) {
       document.querySelector(".AddButton").style.display = "none";
@@ -90,7 +89,7 @@ class Home extends Component {
       // Listener per cambiamento di nome_coop
       this.db.collection("user").doc(this.state.info_user.display_name)
       .onSnapshot(function(doc) {
-        if((doc.data()).nome_coop)
+        if((doc.data()).coop.nome_coop)
         {
           alert("Sei stato accettato!");
         }
@@ -110,12 +109,16 @@ class Home extends Component {
 
   // RIMMUOVE STREAMER DALLA LISTA DI RICERCA NEL DB
   deleteDB() {
-    this.db.collection('user').doc(this.state.info_user.login).delete();
+    this.db.collection('user').doc(this.state.info_user.login).update({
+      info: firebase.firestore.FieldValue.delete()
+    });
   }
 
   // RIMMUOVE user DALLA LISTA DI RICERCA NEL DB
   deleteUserDB(user) {
-    this.db.collection('user').doc(user).delete();
+    this.db.collection('user').doc(user).update({
+      info: firebase.firestore.FieldValue.delete()
+    });
   }
 
   // RESTITUISCE LA LISTA DI ELEMENTI <Streaming> CONTENENTI LE INFO DI CHI CERCA COOP
@@ -233,10 +236,30 @@ class Home extends Component {
         localStorage.setItem("info_user", JSON.stringify(this.state.info_user));
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
         this.setState({});
+        this.setCoop();
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
         console.log('e', err);
       });
     }
+  }
+
+  setCoop() {
+
+    this.db.collection("user").doc(this.state.info_user.login).get().then((doc) => {
+      if(!doc.data())
+      {
+        this.db.collection("user").doc(this.state.info_user.login).set({
+          coop: {
+            list: [],
+            richiesta_coop: false,
+            nome_coop: this.state.info_user.display_name
+          }
+        })
+        .catch(function(error) {
+          console.error("Error adding document: ", error);
+        });
+      }
+    });
   }
 
   // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
@@ -265,7 +288,7 @@ class Home extends Component {
     this.selectedStreaming = el.target.classList.item(1);
     this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
       // Se ci sono elementi nella coop li aggiungo all'anteprima
-      let path = querySnapshot.data().coop ? this.selectedStreaming + "/" + querySnapshot.data().coop.join("/") : this.selectedStreaming;
+      let path = querySnapshot.data().coop.list ? this.selectedStreaming + "/" + querySnapshot.data().coop.list.join("/") : this.selectedStreaming;
       let ref = ReactDOM.render(<ViewsPage path={path}/>, anteprima);
       anteprima.style.display = "block";
       document.querySelector(".cover").style.display = "block";
@@ -303,9 +326,9 @@ class Home extends Component {
 
   // LISTENER SUL CAMBIO DELL'ELEMENTO "login + _last_chat" NEL DB
   addLastchatListener() {
-    this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-      this.state.DbUserInfo = (querySnapshot.data());
-    });
+    /*this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
+      this.state.DbUserInfo = ((querySnapshot.data()).info);
+    });*/
     console.log("login_listener: " + this.state.info_user.display_name);
     this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
     .onSnapshot(function(doc) {
@@ -359,18 +382,18 @@ class Home extends Component {
               // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
               btnAcc.onclick = function (e) {
                 this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-                  let coop = (querySnapshot.data()).coop || [];
-                  let presenti = parseInt((querySnapshot.data()).presenti) +  1;
+                  let coop = (querySnapshot.data()).coop.list || [];
+                  let presenti = parseInt((querySnapshot.data()).info.presenti) +  1;
                   coop.push(us);
                   this.db.collection("user").doc(this.state.info_user.display_name).update({
-                    presenti: presenti.toString(),
-                    coop: coop
+                    "info.presenti": presenti.toString(),
+                    "coop.list": coop
                   })
                   .then(function(docRef) {
                     // Rimmuove i bottoni accetta/rifiuta dalla chat
                     e.path[2].removeChild(e.path[1]);
                     this.db.collection("user").doc(us).get().then((querySnapshot) => {
-                      if((querySnapshot.data()).nome_coop === us)
+                      if((querySnapshot.data()).coop.nome_coop === us)
                       {
                         this.db.collection("user").doc(us).update({nome_coop: this.state.info_user.display_name});
                         this.deleteUserDB(us);
@@ -391,7 +414,8 @@ class Home extends Component {
                 })
                 .then(function(docRef) {
                   this.db.collection("user").doc(us).update({
-                    richiesta_coop: false });
+                    "coop.richiesta_coop": false
+                  });
                   // Rimmuove i bottoni accetta/rifiuta dalla chat
                   e.path[2].removeChild(e.path[1]);
                 }.bind(this));
@@ -417,12 +441,12 @@ class Home extends Component {
    */
   partecipa() {
     this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-      if(querySnapshot.data().nome_coop === this.state.info_user.display_name)
+      if(querySnapshot.data().coop.nome_coop === this.state.info_user.display_name)
       {
-        if(!querySnapshot.data().richiesta_coop)
+        if(!querySnapshot.data().coop.richiesta_coop)
         {
           this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
-            let info = querySnapshot.data();
+            let info = querySnapshot.data().info;
             // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
             if(info.presenti < info.necessari)
             {
@@ -430,7 +454,12 @@ class Home extends Component {
                 [this.state.info_user.display_name]: {richiesta: true}
               });
               this.db.collection("user").doc(this.state.info_user.display_name).update({
-                richiesta_coop: true });
+                "coop.richiesta_coop": true
+              }).then(() => {
+                this.db.collection("user").doc(this.state.info_user.display_name).set({
+                  coop: {nome: "neeee", nome_coop: "niiii"}}
+                );
+              });
             } else {
               alert("Non ci sono più posti");
             }
@@ -536,7 +565,8 @@ class Home extends Component {
     let obj = {};
     this.db.collection("user").get().then((querySnapshot) => {
       querySnapshot.forEach((doc) => {
-          obj[doc.id] = doc.data();
+        if((doc.data()).info)
+          obj[doc.id] = (doc.data()).info;
       });
       this.setState({lista: obj});
     })
@@ -548,7 +578,7 @@ class Home extends Component {
   stampaDB() {
     this.db.collection("user").get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-            console.log(doc.id, doc.data());
+            console.log(doc.info.id, doc.info.data());
         });
     });
   }
@@ -568,6 +598,8 @@ class Home extends Component {
     }
 
     this.addLastchatListener();
+    //Non posso farlo perchè altrimenti ad ogni modifica della stringa lo aggiunge al db
+    //this.setCoop();
   }
 
   // -----------
