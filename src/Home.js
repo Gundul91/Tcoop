@@ -384,24 +384,22 @@ class Home extends Component {
               btnRif.innerHTML = "Rifiuta";
               // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
               btnAcc.onclick = function (e) {
-                this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-                  let coop = (querySnapshot.data()).coop.list || [];
-                  let presenti = parseInt((querySnapshot.data()).info.presenti) +  1;
+                this.db.collection("user").doc(this.state.info_user.display_name).get().then((userDB) => {
+                  let coop = (userDB.data()).coop.list || [];
+                  let presenti = parseInt((userDB.data()).info.presenti) +  1;
                   coop.push(us);
                   this.db.collection("user").doc(this.state.info_user.display_name).update({
                     "info.presenti": presenti.toString(),
                     "coop.list": coop
                   })
                   .then(function(docRef) {
-                    // Rimmuove i bottoni accetta/rifiuta dalla chat
-                    e.path[2].removeChild(e.path[1]);
-                    this.db.collection("user").doc(us).get().then((querySnapshot) => {
-                      if((querySnapshot.data()).coop.nome_coop === us)
+                    this.db.collection("user").doc(us).get().then((userRichiedenteDB) => {
+                      if((userRichiedenteDB.data()).coop.list.length < 1)
                       {
                         this.db.collection("user").doc(us).update({"coop.nome_coop": this.state.info_user.display_name});
                         this.deleteUserDB(us);
                       } else {
-                        // Se la persona ha già trovato una coop indicare allo streamer che ormai non è più disponibile
+                        // AL POSTO DI CONTROLLARE SE IL RICHIEDENTE HA TROVATO ALTRE COOP TROVARE IL MODO DI CONTROLLARE SE HA ANNULLATO LA RICHIESTA
                       }
                     });
                   }.bind(this))
@@ -409,6 +407,8 @@ class Home extends Component {
                     console.error("Error adding document: ", error);
                   });
                 });
+                // Rimmuove i bottoni accetta/rifiuta dalla chat
+                e.path[2].removeChild(e.path[1]);
               }.bind(this);
               btnRif.onclick = function (e) {
                 this.db.collection("chat").doc(us).collection("messaggi_da_leggere").doc("lista").update({
@@ -419,9 +419,9 @@ class Home extends Component {
                   this.db.collection("user").doc(us).update({
                     "coop.richiesta_coop": false
                   });
-                  // Rimmuove i bottoni accetta/rifiuta dalla chat
-                  e.path[2].removeChild(e.path[1]);
                 }.bind(this));
+                // Rimmuove i bottoni accetta/rifiuta dalla chat
+                e.path[2].removeChild(e.path[1]);
               }.bind(this);
               li.appendChild(btnAcc);
               li.appendChild(btnRif);
@@ -443,13 +443,14 @@ class Home extends Component {
    * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
    */
   partecipa() {
-    this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-      if(querySnapshot.data().coop.nome_coop === this.state.info_user.display_name)
+    this.db.collection("user").doc(this.state.info_user.display_name).get().then((userDB) => {
+      console.log(userDB.data().coop.list.length);
+      if(userDB.data().coop.nome_coop === this.state.info_user.display_name && userDB.data().coop.list.length < 1)
       {
-        if(!querySnapshot.data().coop.richiesta_coop)
+        if(!userDB.data().coop.richiesta_coop)
         {
-          this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
-            let info = querySnapshot.data().info;
+          this.db.collection("user").doc(this.selectedStreaming).get().then((selectedUserDB) => {
+            let info = selectedUserDB.data().info;
             // Controlla che intanto non si sia raggiunto il numero di giocatori necessari
             if(info.presenti < info.necessari)
             {
