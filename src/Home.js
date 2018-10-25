@@ -86,14 +86,6 @@ class Home extends Component {
       document.querySelector(".DeleteButton").style.display = "inline-block";
       document.querySelector(".InputAdd").style.display = "none";
       this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista").set({});
-      // Listener per cambiamento di nome_coop
-      this.db.collection("user").doc(this.state.info_user.display_name)
-      .onSnapshot(function(doc) {
-        if((doc.data()).coop && (doc.data()).coop.nome_coop !== this.state.info_user.display_name)
-        {
-          alert("Sei stato accettato!");
-        }
-      }.bind(this));
       // this.setCoop(); DOVREBBE POTERSI TOGLIERE NEL PROGETTO FINALE
       this.setCoop();
     }.bind(this))
@@ -221,6 +213,7 @@ class Home extends Component {
       {
         this.state.info_user.display_name = localStorage.getItem("display_name");
       }
+      this.listenDBChange();
     } else if(this.access_info.access_token !== undefined)
     {
       let auth = "Bearer " +  this.access_info.access_token
@@ -239,10 +232,35 @@ class Home extends Component {
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
         this.setState({});
         this.setCoop();
+        this.listenDBChange();
       }.bind(this)).catch(function(err) { // .bind(this) per poterlo utilizzare nella funzione
         console.log('e', err);
       });
     }
+  }
+
+  listenDBChange() {
+    this.db.collection("user").doc(this.state.info_user.display_name)
+    .onSnapshot(function(doc) {
+      if((doc.data()).coop)
+      {
+        if((doc.data()).coop.nome_coop) {
+          // mostra bottone coop ( e assegna )
+
+          let btnCoop = document.createElement("button");
+          btnCoop.className = "coop";
+          btnCoop.innerHTML = "COOP";
+          btnCoop.onclick = function () {
+            // Prendere nomi della coop, creare la stringa e metterla al posto di /Gundul91 <-----------------------------------------
+            this.props.history.push('/Gundul91');
+          }.bind(this);
+          document.querySelector('.TopBar').appendChild(btnCoop);
+          if((doc.data()).coop.nome_coop !== this.state.info_user.display_name) {
+            alert("Sei stato accettato!");
+          }
+        }
+      }
+    }.bind(this));
   }
 
   setCoop() {
@@ -585,13 +603,18 @@ class Home extends Component {
 
   // X TEST: EVENTO CAMBIO TESTO NEL TEXTBOX DI TEST
   onChange() {
+    console.log("onchange");
     this.state.info_user.display_name = document.getElementById('txtUser').value;
     this.state.info_user.login = this.state.info_user.display_name;
     localStorage.setItem("display_name", this.state.info_user.display_name);
     if(this.state.lista[this.state.info_user.login])
     {
+      console.log("onchange SI");
       document.querySelector(".AddButton").style.display = "none";
       document.querySelector(".DeleteButton").style.display = "inline-block";
+
+      this.listenDBChange();
+
     } else {
       document.querySelector(".AddButton").style.display = "inline-block";
       document.querySelector(".DeleteButton").style.display = "none";
