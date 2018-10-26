@@ -248,7 +248,7 @@ class Home extends Component {
     .onSnapshot(function(doc) {
       if((doc.data()) && (doc.data()).coop)
       {
-        if((doc.data()).coop.nome_coop) {
+        if((doc.data()).coop.nome_coop && !document.querySelector(".coop")) {
           let btnCoop = document.createElement("button");
           btnCoop.className = "coop";
           btnCoop.innerHTML = "COOP";
@@ -258,8 +258,10 @@ class Home extends Component {
               // Se la coop è sua prende la lista dalle sue info nel DB, altrimenti prende le info del creatore della coop
               if((doc.data()).coop.nome_coop === this.state.info_user.login)
               {
-                stringa = "/" + this.state.info_user.login + "/" + (doc.data()).coop.list.join("/");
-                this.props.history.push(stringa);
+                stringa = "/" + this.state.info_user.login;
+                if((doc.data()).coop.list.length > 0)
+                  stringa += "/" + (doc.data()).coop.list.join("/");
+                this.props.history.push({pathname: stringa, state: { info_user: this.state.info_user }});
               } else {
                 this.db.collection("user").doc((doc.data()).coop.nome_coop).get().then(function(doc){
                   let lista = (doc.data()).coop.list;
@@ -268,7 +270,7 @@ class Home extends Component {
                   stringa = "/" + this.state.info_user.login + "/" + (doc.data()).coop.nome_coop;
                   if(lista.length > 0)
                     stringa += "/" + lista.join("/");
-                  this.props.history.push(stringa);
+                  this.props.history.push({pathname: stringa, state: { info_user: this.state.info_user, sendMessage: this.sendMessage.bind(this), msgClick: this.msgClick.bind(this) }});
                 }.bind(this));
               }
             }.bind(this));
@@ -328,7 +330,7 @@ class Home extends Component {
     this.selectedStreaming = el.target.classList.item(1);
     this.db.collection("user").doc(this.selectedStreaming).get().then((querySnapshot) => {
       // Se ci sono elementi nella coop li aggiungo all'anteprima
-      let path = querySnapshot.data().coop.list ? this.selectedStreaming + "/" + querySnapshot.data().coop.list.join("/") : this.selectedStreaming;
+      let path = querySnapshot.data().coop.list.length > 0 ? this.selectedStreaming + "/" + querySnapshot.data().coop.list.join("/") : this.selectedStreaming;
       let ref = ReactDOM.render(<ViewsPage path={path}/>, anteprima);
       anteprima.style.display = "block";
       document.querySelector(".cover").style.display = "block";
@@ -541,6 +543,7 @@ class Home extends Component {
 
   // INVIO MESSAGGIO PRIVATO
   sendMessage() {
+    console.log("sendMessage()");
     let utente = document.getElementById('txtRicevente').value;
     let messaggio = document.getElementById('txtMessage').value;
 
@@ -587,6 +590,7 @@ class Home extends Component {
         let ul = document.createElement("UL");
         ul.id = "lista_discussione_" + utente;
         document.getElementById('discussione').appendChild(ul);
+        console.log(document.getElementById('discussione'));
       }
       let li = document.createElement("LI");
       li.innerHTML = this.state.info_user.display_name + ": " + messaggio;

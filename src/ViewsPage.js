@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import SingleView from './SingleView.js'
 import Chat from './Chat.js'
 import { Link } from 'react-router-dom'
+import Whisperers from './Whisperers.js'
 
 class ViewsPage extends Component {
 
@@ -102,6 +103,7 @@ class ViewsPage extends Component {
     {
       streamers = this.props.location.pathname.split("/")
       streamers.shift()
+      console.log(this.props.location.state.info_user, this.props.location.state.sendMessage);
     }
 
     if(this.props.path)
@@ -147,6 +149,9 @@ class ViewsPage extends Component {
             )
           }
         </div>
+        {
+          (this.props.location) && (this.props.location.state) && <Whisperers sendMessage={this.props.location.state.sendMessage} msgClick={this.props.location.state.msgClick}/>
+        }
       </div>
     );
   }
