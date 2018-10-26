@@ -239,20 +239,39 @@ class Home extends Component {
     }
   }
 
+  /* AGGIUNGE BOTTONE PER VISUALIZZARE LA PROPRIA COOP
+   * Aggiunge un listener sul "user".nickUtente e quando ci sono cambiamenti controlla se è in una coop e nel caso
+   * mostra il bottone per passare alla visuale della coop
+   */
   listenDBChange() {
     this.db.collection("user").doc(this.state.info_user.display_name)
     .onSnapshot(function(doc) {
-      if((doc.data()).coop)
+      if((doc.data()) && (doc.data()).coop)
       {
         if((doc.data()).coop.nome_coop) {
-          // mostra bottone coop ( e assegna )
-
           let btnCoop = document.createElement("button");
           btnCoop.className = "coop";
           btnCoop.innerHTML = "COOP";
           btnCoop.onclick = function () {
-            // Prendere nomi della coop, creare la stringa e metterla al posto di /Gundul91 <-----------------------------------------
-            this.props.history.push('/Gundul91');
+            let stringa = "";
+            this.db.collection("user").doc(this.state.info_user.login).get().then(function(doc){
+              // Se la coop è sua prende la lista dalle sue info nel DB, altrimenti prende le info del creatore della coop
+              if((doc.data()).coop.nome_coop === this.state.info_user.login)
+              {
+                stringa = "/" + this.state.info_user.login + "/" + (doc.data()).coop.list.join("/");
+                this.props.history.push(stringa);
+              } else {
+                this.db.collection("user").doc((doc.data()).coop.nome_coop).get().then(function(doc){
+                  let lista = (doc.data()).coop.list;
+                  lista.splice(lista.indexOf(this.state.info_user.login), 1);
+                  console.log("index",(doc.data()).coop.list.indexOf(this.state.info_user.login),lista);
+                  stringa = "/" + this.state.info_user.login + "/" + (doc.data()).coop.nome_coop;
+                  if(lista.length > 0)
+                    stringa += "/" + lista.join("/");
+                  this.props.history.push(stringa);
+                }.bind(this));
+              }
+            }.bind(this));
           }.bind(this);
           document.querySelector('.TopBar').appendChild(btnCoop);
           if((doc.data()).coop.nome_coop !== this.state.info_user.display_name) {
