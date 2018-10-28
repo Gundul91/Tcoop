@@ -99,11 +99,10 @@ class ViewsPage extends Component {
   render() {
     // Prendo nomi streamers dall'url, li separo e rimmuovo il primo elemento vuoto"
     let streamers = []
-    if(this.props.location)
+    if(this.props.location && this.props.location.pathname)
     {
       streamers = this.props.location.pathname.split("/")
       streamers.shift()
-      console.log(this.props.location.state.info_user, this.props.location.state.sendMessage);
     }
 
     if(this.props.path)
