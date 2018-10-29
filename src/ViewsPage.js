@@ -3,8 +3,13 @@ import SingleView from './SingleView.js'
 import Chat from './Chat.js'
 import { Link } from 'react-router-dom'
 import Whisperers from './Whisperers.js'
+import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener } from './funzioniComuni.js'
 
 class ViewsPage extends Component {
+
+  state = {
+
+  }
 
   // CALCOLA PROPORZIONI FINESTRE E BOTTONI CHAT
   viewsSize() {
@@ -94,6 +99,15 @@ class ViewsPage extends Component {
     this.viewsSize();
     this.viewsSizeBindato = this.viewsSize.bind(this);
     window.addEventListener("resize", this.viewsSizeBindato);
+    if(this.props.location && this.props.location.pathname)
+    {
+      this.contatori = [];
+      this.state.info_user = this.props.location.state.info_user;
+      console.log("this.state.info_user", this.state.info_user);
+      requireFB.bind(this)();
+      initDB.bind(this)();
+      addLastchatListener.bind(this)();
+    }
   }
 
   render() {
@@ -149,7 +163,7 @@ class ViewsPage extends Component {
           }
         </div>
         {
-          (this.props.location) && (this.props.location.state) && <Whisperers sendMessage={this.props.location.state.sendMessage} msgClick={this.props.location.state.msgClick}/>
+          (this.props.location) && (this.props.location.state) && <Whisperers sendMessage={sendMessage.bind(this)} msgClick={msgClick.bind(this)}/>
         }
       </div>
     );

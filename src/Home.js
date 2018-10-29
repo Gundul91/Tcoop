@@ -7,7 +7,7 @@ import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
 import { withRouter } from 'react-router-dom';
 import ViewsPage from './ViewsPage.js'
-import { initDB, requireFB, msgClick, sendMessage, aggiungi } from './funzioniComuni.js'
+import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener } from './funzioniComuni.js'
 
 
 class Home extends Component {
@@ -205,7 +205,7 @@ class Home extends Component {
         return c.json()
       }).then(function(user) {
         this.state.info_user = user.data[0];
-        this.addLastchatListener();
+        addLastchatListener.bind(this)();
         // Non si possono salvare oggetti in localStorage, è necessario convertirli in stringa
         localStorage.setItem("info_user", JSON.stringify(this.state.info_user));
         // Renderizzo per i casi in cui la promis si concluda troppo tardi
@@ -223,7 +223,11 @@ class Home extends Component {
    * mostra il bottone per passare alla visuale della coop
    */
   listenDBChange() {
-    this.db.collection("user").doc(this.state.info_user.display_name)
+    // Controllare se serve poi ancora quando non ci sarà più il cambio di nick nel test
+    if(this.unsubscribeUser)
+      this.unsubscribeUser();
+    // assegna a var unsubscribeUser la funzione per rimmuovere il listener
+    this.unsubscribeUser = this.db.collection("user").doc(this.state.info_user.display_name)
     .onSnapshot(function(doc) {
       if((doc.data()) && (doc.data()).coop)
       {
@@ -231,29 +235,7 @@ class Home extends Component {
           let btnCoop = document.createElement("button");
           btnCoop.className = "coop";
           btnCoop.innerHTML = "COOP";
-          btnCoop.onclick = function () {
-            let stringa = "";
-            this.db.collection("user").doc(this.state.info_user.login).get().then(function(doc){
-              // Se la coop è sua prende la lista dalle sue info nel DB, altrimenti prende le info del creatore della coop
-              if((doc.data()).coop.nome_coop === this.state.info_user.login)
-              {
-                stringa = "/" + this.state.info_user.login;
-                if((doc.data()).coop.list.length > 0)
-                  stringa += "/" + (doc.data()).coop.list.join("/");
-                this.props.history.push({pathname: stringa, state: { info_user: this.state.info_user }});
-              } else {
-                this.db.collection("user").doc((doc.data()).coop.nome_coop).get().then(function(doc){
-                  let lista = (doc.data()).coop.list;
-                  lista.splice(lista.indexOf(this.state.info_user.login), 1);
-                  console.log("index",(doc.data()).coop.list.indexOf(this.state.info_user.login),lista);
-                  stringa = "/" + this.state.info_user.login + "/" + (doc.data()).coop.nome_coop;
-                  if(lista.length > 0)
-                    stringa += "/" + lista.join("/");
-                  this.props.history.push({pathname: stringa, state: { info_user: this.state.info_user }});
-                }.bind(this));
-              }
-            }.bind(this));
-          }.bind(this);
+          btnCoop.onclick = toCoop.bind(this);
           document.querySelector('.TopBar').appendChild(btnCoop);
           if((doc.data()).coop.nome_coop !== this.state.info_user.display_name) {
             alert("Sei stato accettato!");
@@ -346,118 +328,6 @@ class Home extends Component {
 
   }
 
-  // LISTENER SUL CAMBIO DELL'ELEMENTO "login + _last_chat" NEL DB
-  addLastchatListener() {
-    /*this.db.collection("user").doc(this.state.info_user.display_name).get().then((querySnapshot) => {
-      this.state.DbUserInfo = ((querySnapshot.data()).info);
-    });*/
-    console.log("login_listener: " + this.state.info_user.display_name);
-    this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
-    .onSnapshot(function(doc) {
-      let da_leggere = doc.data();
-      console.log("cambiato: ", da_leggere);
-      // us sono le key che sono i nick mentre da_leggere e l'array di messaggi_da_leggere
-      for(let us in da_leggere)
-      {
-        // Se la lista non esiste la crea e la riempie
-        if(!document.getElementById("lista_discussione_" + us))
-        {
-          let button = document.createElement("BUTTON");
-          let dbRef = this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista");
-          button.innerHTML = us;
-          button.style.backgroundColor = "red";
-          button.onclick = function(el) {
-            el.target.style.backgroundColor = "";
-            // Rimmuove us dalla lista dei messaggi da leggere
-            dbRef.update({
-              [us]: this.firebase.firestore.FieldValue.delete()
-            });
-            // Cambia le classi alle liste per visualizzare qulla selezionata
-            let whispAperta = document.querySelector(".selectedWhisp");
-            if(whispAperta)
-              whispAperta.className = "whisp";
-            document.getElementById("lista_discussione_" + us).className = "selectedWhisp";
-          }.bind(this);
-          document.getElementById("bottoniWhisperers").appendChild(button);
-
-          let ul = document.createElement("UL");
-          ul.id = "lista_discussione_" + us;
-          ul.className = "whisp";
-          let stringa = this.state.info_user.display_name > us ? "chat_" + us + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + us;
-          this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
-            // Scorre i messaggi del DB e li aggiunge alla lista
-            querySnapshot.forEach((doc) => {
-                let msg = doc.data();
-                let li = document.createElement("LI");
-                li.innerHTML = msg.users + ": " + msg.mess;
-                ul.appendChild(li);
-            });
-            // Se c'è una richiesta di coop viene aggiunta alla chat
-            if(da_leggere[us].richiesta) {
-              let li = document.createElement("LI");
-              let btnAcc = document.createElement("button");
-              btnAcc.className = "accetta";
-              btnAcc.innerHTML = "Accetta";
-              let btnRif = document.createElement("button");
-              btnRif.className = "rifiuta";
-              btnRif.innerHTML = "Rifiuta";
-              // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
-              btnAcc.onclick = function (e) {
-                this.db.collection("user").doc(this.state.info_user.display_name).get().then((userDB) => {
-                  let coop = (userDB.data()).coop.list || [];
-                  let presenti = parseInt((userDB.data()).info.presenti) +  1;
-                  coop.push(us);
-                  this.db.collection("user").doc(this.state.info_user.display_name).update({
-                    "info.presenti": presenti.toString(),
-                    "coop.list": coop
-                  })
-                  .then(function(docRef) {
-                    this.db.collection("user").doc(us).get().then((userRichiedenteDB) => {
-                      if((userRichiedenteDB.data()).coop.list.length < 1)
-                      {
-                        this.db.collection("user").doc(us).update({"coop.nome_coop": this.state.info_user.display_name});
-                        this.deleteUserDB(us);
-                      } else {
-                        // AL POSTO DI CONTROLLARE SE IL RICHIEDENTE HA TROVATO ALTRE COOP TROVARE IL MODO DI CONTROLLARE SE HA ANNULLATO LA RICHIESTA
-                      }
-                    });
-                  }.bind(this))
-                  .catch(function(error) {
-                    console.error("Error adding document: ", error);
-                  });
-                });
-                // Rimmuove i bottoni accetta/rifiuta dalla chat
-                e.path[2].removeChild(e.path[1]);
-              }.bind(this);
-              btnRif.onclick = function (e) {
-                this.db.collection("chat").doc(us).collection("messaggi_da_leggere").doc("lista").update({
-                  [this.state.info_user.display_name]: {messaggio: "La richiesta è stata rifiutata",
-                  randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
-                })
-                .then(function(docRef) {
-                  this.db.collection("user").doc(us).update({
-                    "coop.richiesta_coop": false
-                  });
-                }.bind(this));
-                // Rimmuove i bottoni accetta/rifiuta dalla chat
-                e.path[2].removeChild(e.path[1]);
-              }.bind(this);
-              li.appendChild(btnAcc);
-              li.appendChild(btnRif);
-              ul.appendChild(li);
-            }
-          });
-          document.getElementById('discussione').appendChild(ul);
-        } else {
-          // Se la lista esiste aggiunge il messaggio ad essa
-          let li = document.createElement("LI");
-          li.innerHTML = (da_leggere[us].richiesta) ? 'Vuole partecipare alla coop </br> <button class="accetta">Accetta</button> <button class="rifiuta">Rifiuta</button>' : us + ": " + da_leggere[us].messaggio;
-          document.getElementById("lista_discussione_" + us).appendChild(li);
-        }
-      }
-    }.bind(this));
-  }
-
   /* MANDA RICHIESTA DI PARTECIPAZIONE ALLA COOP
    * Aggiunge al db di this.selectedStreaming una richiesta di partecipazione che gli comparirà in chat
    */
@@ -548,7 +418,7 @@ class Home extends Component {
       document.querySelector(".DeleteButton").style.display = "none";
     }
 
-    this.addLastchatListener();
+    addLastchatListener.bind(this)();
     //Non posso farlo perchè altrimenti ad ogni modifica della stringa lo aggiunge al db
     //this.setCoop();
   }
