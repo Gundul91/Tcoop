@@ -1,3 +1,6 @@
+
+import { firebaseapiKey } from './keys.js'
+
 export function requireFB() {
   this.firebase = require("firebase");
   // Required for side-effects
@@ -10,7 +13,7 @@ export function initDB() {
   if (!this.firebase.apps.length) {
     // Settings per this.firebase
     this.firebase.initializeApp({
-      apiKey: "AIzaSyCaQYYVlMGO7ha0g31l6iYPLxj8pNb9c0o",
+      apiKey: firebaseapiKey,
       authDomain: "tcoop-6668f.this.firebaseapp.com",
       databaseURL: "https://tcoop-6668f.firebaseio.com",
       projectId: "tcoop-6668f",

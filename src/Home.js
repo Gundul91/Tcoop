@@ -5,8 +5,9 @@ import Streaming from './Streaming.js'
 import TopBar from './TopBar.js'
 import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
-import { withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom'
 import ViewsPage from './ViewsPage.js'
+import { firebaseapiKey } from './keys.js'
 import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener, deleteDB } from './funzioniComuni.js'
 
 
