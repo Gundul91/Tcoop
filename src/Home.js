@@ -7,7 +7,6 @@ import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
 import { withRouter } from 'react-router-dom'
 import ViewsPage from './ViewsPage.js'
-import { firebaseapiKey } from './keys.js'
 import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener, deleteDB } from './funzioniComuni.js'
 
 
@@ -229,7 +228,7 @@ class Home extends Component {
           }
           if((doc.data()).coop.nome_coop !== this.state.info_user.display_name && (doc.data()).coop.richiesta_coop === true) {
             alert("Sei stato accettato!");
-            this.db.collection("user").doc(this.state.info_user.display_name).set({"coop.richiesta_coop": false});
+            this.db.collection("user").doc(this.state.info_user.display_name).update({"coop.richiesta_coop": false});
           }
         }
       }
