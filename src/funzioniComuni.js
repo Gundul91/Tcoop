@@ -128,7 +128,19 @@ export function toCoop() {
   }.bind(this));
 }
 
+// RIMMUOVE STREAMER DALLA LISTA DI RICERCA NEL DB
+export function deleteDB() {
+  this.db.collection('user').doc(this.state.info_user.login).update({
+    info: this.firebase.firestore.FieldValue.delete()
+  });
+}
 
+// RIMMUOVE user DALLA LISTA DI RICERCA NEL DB
+export function deleteUserDB(user) {
+  this.db.collection('user').doc(user).update({
+    info: this.firebase.firestore.FieldValue.delete()
+  });
+}
 
 // LISTENER SUL CAMBIO DELL'ELEMENTO "login + _last_chat" NEL DB
 export function addLastchatListener() {
@@ -202,11 +214,16 @@ export function addLastchatListener() {
                     if((userRichiedenteDB.data()).coop.list.length < 1)
                     {
                       this.db.collection("user").doc(us).update({"coop.nome_coop": this.state.info_user.display_name});
-                      this.deleteUserDB(us);
+                      deleteUserDB.bind(this)(us);
                     } else {
                       // AL POSTO DI CONTROLLARE SE IL RICHIEDENTE HA TROVATO ALTRE COOP TROVARE IL MODO DI CONTROLLARE SE HA ANNULLATO LA RICHIESTA
                     }
                   });
+                  if(this.props.location && this.props.location.pathname)
+                  {
+                    toCoop.bind(this)();
+                    this.setState({});
+                  }
                 }.bind(this))
                 .catch(function(error) {
                   console.error("Error adding document: ", error);

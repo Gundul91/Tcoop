@@ -110,6 +110,10 @@ class ViewsPage extends Component {
     }
   }
 
+  componentDidUpdate () {
+    this.componentDidMount();
+  }
+
   render() {
     // Prendo nomi streamers dall'url, li separo e rimmuovo il primo elemento vuoto"
     let streamers = []

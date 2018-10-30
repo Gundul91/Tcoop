@@ -7,7 +7,7 @@ import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
 import { withRouter } from 'react-router-dom';
 import ViewsPage from './ViewsPage.js'
-import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener } from './funzioniComuni.js'
+import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener, deleteDB } from './funzioniComuni.js'
 
 
 class Home extends Component {
@@ -95,21 +95,7 @@ class Home extends Component {
   removeList() {
     document.querySelector(".AddButton").style.display = "inline-block";
     document.querySelector(".DeleteButton").style.display = "none";
-    this.deleteDB();
-  }
-
-  // RIMMUOVE STREAMER DALLA LISTA DI RICERCA NEL DB
-  deleteDB() {
-    this.db.collection('user').doc(this.state.info_user.login).update({
-      info: this.firebase.firestore.FieldValue.delete()
-    });
-  }
-
-  // RIMMUOVE user DALLA LISTA DI RICERCA NEL DB
-  deleteUserDB(user) {
-    this.db.collection('user').doc(user).update({
-      info: this.firebase.firestore.FieldValue.delete()
-    });
+    deleteDB.bind(this)();
   }
 
   // RESTITUISCE LA LISTA DI ELEMENTI <Streaming> CONTENENTI LE INFO DI CHI CERCA COOP
