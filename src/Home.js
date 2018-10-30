@@ -215,16 +215,20 @@ class Home extends Component {
     // assegna a var unsubscribeUser la funzione per rimmuovere il listener
     this.unsubscribeUser = this.db.collection("user").doc(this.state.info_user.display_name)
     .onSnapshot(function(doc) {
+      console.log("tutto", (doc.data()), document.querySelector(".coop"));
       if((doc.data()) && (doc.data()).coop)
       {
-        if((doc.data()).coop.nome_coop && !document.querySelector(".coop")) {
-          let btnCoop = document.createElement("button");
-          btnCoop.className = "coop";
-          btnCoop.innerHTML = "COOP";
-          btnCoop.onclick = toCoop.bind(this);
-          document.querySelector('.TopBar').appendChild(btnCoop);
-          if((doc.data()).coop.nome_coop !== this.state.info_user.display_name) {
+        if((doc.data()).coop.nome_coop) {
+          if(!document.querySelector(".coop")) {
+            let btnCoop = document.createElement("button");
+            btnCoop.className = "coop";
+            btnCoop.innerHTML = "COOP";
+            btnCoop.onclick = toCoop.bind(this);
+            document.querySelector('.TopBar').appendChild(btnCoop);
+          }
+          if((doc.data()).coop.nome_coop !== this.state.info_user.display_name && (doc.data()).coop.richiesta_coop === true) {
             alert("Sei stato accettato!");
+            this.db.collection("user").doc(this.state.info_user.display_name).set({"coop.richiesta_coop": false});
           }
         }
       }
