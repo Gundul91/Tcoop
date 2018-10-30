@@ -241,9 +241,9 @@ export function addLastchatListener() {
                 randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
               })
               .then(function(docRef) {
-                /*this.db.collection("user").doc(us).update({
+                this.db.collection("user").doc(us).update({
                   "coop.richiesta_coop": false
-                });*/
+                });
               }.bind(this));
               // Rimmuove i bottoni accetta/rifiuta dalla chat
               e.path[2].removeChild(e.path[1]);
