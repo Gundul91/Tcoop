@@ -91,14 +91,9 @@ export function aggiungi() {
     // Aggiunge il messaggio alla lista nella finestra
     if(!document.getElementById("lista_discussione_" + utente))
     {
-      let ul = document.createElement("UL");
-      ul.id = "lista_discussione_" + utente;
-      document.getElementById('discussione').appendChild(ul);
-      console.log(document.getElementById('discussione'));
+      this.whispRef.current.addChat("lista_discussione_" + utente);
     }
-    let li = document.createElement("LI");
-    li.innerHTML = this.state.info_user.display_name + ": " + messaggio;
-    document.getElementById("lista_discussione_" + utente).appendChild(li);
+    this.whispRef.current.addMessage(this.state.info_user.display_name + ": " + messaggio, "lista_discussione_" + utente);
   })
   .catch(function(error) {
     console.error("Error adding document: ", error);
@@ -181,79 +176,20 @@ export function addLastchatListener() {
         }.bind(this);
         document.getElementById("bottoniWhisperers").appendChild(button);
 
-        let ul = document.createElement("UL");
-        ul.id = "lista_discussione_" + us;
-        ul.className = "whisp";
+        this.whispRef.current.addChat("lista_discussione_" + us);
+        this.whispRef.current.hideList("lista_discussione_" + us);
         let stringa = this.state.info_user.display_name > us ? "chat_" + us + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + us;
         this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
           // Scorre i messaggi del DB e li aggiunge alla lista
           querySnapshot.forEach((doc) => {
               let msg = doc.data();
-              let li = document.createElement("LI");
-              li.innerHTML = msg.users + ": " + msg.mess;
-              ul.appendChild(li);
+              this.whispRef.current.addMessage(msg.users + ": " + msg.mess, "lista_discussione_" + us);
           });
           // Se c'è una richiesta di coop viene aggiunta alla chat
           if(da_leggere[us].richiesta) {
-            let li = document.createElement("LI");
-            let btnAcc = document.createElement("button");
-            btnAcc.className = "accetta";
-            btnAcc.innerHTML = "Accetta";
-            let btnRif = document.createElement("button");
-            btnRif.className = "rifiuta";
-            btnRif.innerHTML = "Rifiuta";
-            // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
-            btnAcc.onclick = function (e) {
-              this.db.collection("user").doc(this.state.info_user.display_name).get().then((userDB) => {
-                let coop = (userDB.data()).coop.list || [];
-                let presenti = parseInt((userDB.data()).info.presenti) +  1;
-                coop.push(us);
-                this.db.collection("user").doc(this.state.info_user.display_name).update({
-                  "info.presenti": presenti.toString(),
-                  "coop.list": coop
-                })
-                .then(function(docRef) {
-                  this.db.collection("user").doc(us).get().then((userRichiedenteDB) => {
-                    if((userRichiedenteDB.data()).coop.list.length < 1)
-                    {
-                      this.db.collection("user").doc(us).update({"coop.nome_coop": this.state.info_user.display_name});
-                      deleteUserDB.bind(this)(us);
-                    } else {
-                      // AL POSTO DI CONTROLLARE SE IL RICHIEDENTE HA TROVATO ALTRE COOP TROVARE IL MODO DI CONTROLLARE SE HA ANNULLATO LA RICHIESTA
-                    }
-                  });
-                  if(this.props.location && this.props.location.pathname)
-                  {
-                    toCoop.bind(this)();
-                    this.setState({});
-                  }
-                }.bind(this))
-                .catch(function(error) {
-                  console.error("Error adding document: ", error);
-                });
-              });
-              // Rimmuove i bottoni accetta/rifiuta dalla chat
-              e.path[2].removeChild(e.path[1]);
-            }.bind(this);
-            btnRif.onclick = function (e) {
-              this.db.collection("chat").doc(us).collection("messaggi_da_leggere").doc("lista").update({
-                [this.state.info_user.display_name]: {messaggio: "La richiesta è stata rifiutata",
-                randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
-              })
-              .then(function(docRef) {
-                this.db.collection("user").doc(us).update({
-                  "coop.richiesta_coop": false
-                });
-              }.bind(this));
-              // Rimmuove i bottoni accetta/rifiuta dalla chat
-              e.path[2].removeChild(e.path[1]);
-            }.bind(this);
-            li.appendChild(btnAcc);
-            li.appendChild(btnRif);
-            ul.appendChild(li);
+            msgRichiestaCoop.bind(this)(us);
           }
         });
-        document.getElementById('discussione').appendChild(ul);
       } else {
         // Se la lista esiste aggiunge il messaggio ad essa
         let li = document.createElement("LI");
@@ -262,4 +198,60 @@ export function addLastchatListener() {
       }
     }
   }.bind(this));
+}
+
+export function msgRichiestaCoop(us) {
+  let btnAcc = document.createElement("button");
+  btnAcc.className = "accetta";
+  btnAcc.innerHTML = "Accetta";
+  let btnRif = document.createElement("button");
+  btnRif.className = "rifiuta";
+  btnRif.innerHTML = "Rifiuta";
+  // Se viene accettata la richiesta aggiunge il richiedenta alla lista dei cooperanti nel DB
+  btnAcc.onclick = function (e) {
+    this.db.collection("user").doc(this.state.info_user.display_name).get().then((userDB) => {
+      let coop = (userDB.data()).coop.list || [];
+      let presenti = parseInt((userDB.data()).info.presenti) +  1;
+      coop.push(us);
+      this.db.collection("user").doc(this.state.info_user.display_name).update({
+        "info.presenti": presenti.toString(),
+        "coop.list": coop
+      })
+      .then(function(docRef) {
+        this.db.collection("user").doc(us).get().then((userRichiedenteDB) => {
+          if((userRichiedenteDB.data()).coop.list.length < 1)
+          {
+            this.db.collection("user").doc(us).update({"coop.nome_coop": this.state.info_user.display_name});
+            deleteUserDB.bind(this)(us);
+          } else {
+            // AL POSTO DI CONTROLLARE SE IL RICHIEDENTE HA TROVATO ALTRE COOP TROVARE IL MODO DI CONTROLLARE SE HA ANNULLATO LA RICHIESTA
+          }
+        });
+        if(this.props.location && this.props.location.pathname)
+        {
+          toCoop.bind(this)();
+          this.setState({});
+        }
+      }.bind(this))
+      .catch(function(error) {
+        console.error("Error adding document: ", error);
+      });
+    });
+    // Rimmuove i bottoni accetta/rifiuta dalla chat
+    e.path[2].removeChild(e.path[1]);
+  }.bind(this);
+  btnRif.onclick = function (e) {
+    this.db.collection("chat").doc(us).collection("messaggi_da_leggere").doc("lista").update({
+      [this.state.info_user.display_name]: {messaggio: "La richiesta è stata rifiutata",
+      randoKey: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)}
+    })
+    .then(function(docRef) {
+      this.db.collection("user").doc(us).update({
+        "coop.richiesta_coop": false
+      });
+    }.bind(this));
+    // Rimmuove i bottoni accetta/rifiuta dalla chat
+    e.path[2].removeChild(e.path[1]);
+  }.bind(this);
+  this.whispRef.current.addElementMessage([btnAcc, btnRif], "lista_discussione_" + us);
 }

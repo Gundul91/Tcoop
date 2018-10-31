@@ -7,7 +7,7 @@ import InputAdd from './InputAdd.js'
 import Whisperers from './Whisperers.js'
 import { withRouter } from 'react-router-dom'
 import ViewsPage from './ViewsPage.js'
-import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener, deleteDB } from './funzioniComuni.js'
+import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener, deleteDB, msgRichiestaCoop } from './funzioniComuni.js'
 
 
 class Home extends Component {
@@ -159,6 +159,7 @@ class Home extends Component {
 
   // INIZIALIZZO IL COLLEGAMENTO CON IL DB DI this.firebase
   componentWillMount() {
+    this.whispRef = React.createRef();
     requireFB.bind(this)();
     initDB.bind(this)();
 
@@ -436,7 +437,7 @@ class Home extends Component {
           <br/>
           <button className="ShowButtonTest" onClick={this.showDB.bind(this)} >Show streamer list</button>
         </div>
-        <Whisperers sendMessage={sendMessage.bind(this)} msgClick={msgClick.bind(this)}/>
+        <Whisperers ref={this.whispRef} sendMessage={sendMessage.bind(this)} msgClick={msgClick.bind(this)}/>
         <TopBar info_user={this.state.info_user} addToList={this.addToList.bind(this)} removeList={this.removeList.bind(this)}
         gameChange={this.gameChange.bind(this)} riempi_giochi={this.riempi_giochi.bind(this)} logout={this.logout.bind(this)}/>
         <div className="listaStreaming">

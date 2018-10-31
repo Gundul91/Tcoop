@@ -92,6 +92,10 @@ class ViewsPage extends Component {
     window.removeEventListener("resize", this.viewsSizeBindato);
   }
 
+  componentWillMount() {
+    this.whispRef = React.createRef();
+  }
+
   // LANCIA LA FUNZIONE PER CALCOLARE LE PROPORZIONI E AGGIUNGE IL LISTENER SUL WINDOWS RESIZE
   componentDidMount () {
     if(document.querySelectorAll(".SingleView").length === 1)
@@ -168,7 +172,7 @@ class ViewsPage extends Component {
           }
         </div>
         {
-          (this.props.location) && (this.props.location.state) && <Whisperers sendMessage={sendMessage.bind(this)} msgClick={msgClick.bind(this)}/>
+          (this.props.location) && (this.props.location.state) && <Whisperers ref={this.whispRef} sendMessage={sendMessage.bind(this)} msgClick={msgClick.bind(this)}/>
         }
       </div>
     );
