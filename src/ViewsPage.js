@@ -96,10 +96,11 @@ class ViewsPage extends Component {
   componentDidMount () {
     if(document.querySelectorAll(".SingleView").length === 1)
       document.querySelector(".chatButtons").style.display = "none";
+      console.log("btn", document.querySelector(".chatButton"))
     this.viewsSize();
     this.viewsSizeBindato = this.viewsSize.bind(this);
     window.addEventListener("resize", this.viewsSizeBindato);
-    if(this.props.location && this.props.location.pathname)
+    if(this.props.location && this.props.location.state)
     {
       this.contatori = [];
       this.state.info_user = this.props.location.state.info_user;
