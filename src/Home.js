@@ -260,6 +260,7 @@ class Home extends Component {
   componentDidMount() {
     this.setState({});
     this.contatori = {}; // Per MESSAGGI
+    // SOSTITUIRE CONTATORI CON new Date().valueOf(); CHE RESTITUISCE UN NUMERO INTERO BASATO SUL TEMPO
 
     // X TEST
     document.getElementById('txtUser').value = this.state.info_user.display_name;
