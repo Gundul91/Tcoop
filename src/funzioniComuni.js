@@ -192,9 +192,13 @@ export function addLastchatListener() {
         });
       } else {
         // Se la lista esiste aggiunge il messaggio ad essa
-        let li = document.createElement("LI");
-        li.innerHTML = (da_leggere[us].richiesta) ? 'Vuole partecipare alla coop </br> <button class="accetta">Accetta</button> <button class="rifiuta">Rifiuta</button>' : us + ": " + da_leggere[us].messaggio;
-        document.getElementById("lista_discussione_" + us).appendChild(li);
+        if(da_leggere[us].richiesta) {
+          msgRichiestaCoop.bind(this)(us);
+        } else {
+          let li = document.createElement("LI");
+          li.innerHTML = us + ": " + da_leggere[us].messaggio;
+          document.getElementById("lista_discussione_" + us).appendChild(li);
+        }
       }
     }
   }.bind(this));
@@ -227,7 +231,7 @@ export function msgRichiestaCoop(us) {
             // AL POSTO DI CONTROLLARE SE IL RICHIEDENTE HA TROVATO ALTRE COOP TROVARE IL MODO DI CONTROLLARE SE HA ANNULLATO LA RICHIESTA
           }
         });
-        if(this.props.location && this.props.location.pathname)
+        if(this.props.location && this.props.location.state)
         {
           toCoop.bind(this)();
           this.setState({});
