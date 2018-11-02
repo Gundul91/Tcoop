@@ -101,10 +101,14 @@ export function aggiungi() {
 }
 
 export function toCoop() {
-  // Rimmuovo il listener sui cambiamenti nel DB
-  this.unsubscribeUser();
-  let stringa = "";
   this.db.collection("user").doc(this.state.info_user.login).get().then(function(doc){
+    // Rimmuovo i listener sui cambiamenti nel DB
+    if(!this.props.location.state)
+    {
+      this.unsubscribeUserChat();
+      this.unsubscribeUser();
+    }
+    let stringa = "";
     // Se la coop è sua prende la lista dalle sue info nel DB, altrimenti prende le info del creatore della coop
     if((doc.data()).coop.nome_coop === this.state.info_user.login)
     {

@@ -3,7 +3,7 @@ import SingleView from './SingleView.js'
 import Chat from './Chat.js'
 import { Link } from 'react-router-dom'
 import Whisperers from './Whisperers.js'
-import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener } from './funzioniComuni.js'
+import { initDB, requireFB, msgClick, sendMessage, aggiungi, toCoop, addLastchatListener, deleteDB, msgRichiestaCoop } from './funzioniComuni.js'
 
 class ViewsPage extends Component {
 
