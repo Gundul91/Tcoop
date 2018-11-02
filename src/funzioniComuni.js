@@ -38,6 +38,7 @@ export function msgClick() {
   let whispAperta = document.querySelector(".selectedWhisp");
   if(whispAperta) {
     // whispAperta.id.substring(18) prende solo la stringa dopo i primi 18 caratteri che contiene il nome dello streamer
+    console.log("---", this.state.info_user.display_name, whispAperta);
     this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista").update({
       [whispAperta.id.substring(18)]: this.firebase.firestore.FieldValue.delete()
     });
@@ -48,7 +49,7 @@ export function msgClick() {
 // INVIO MESSAGGIO PRIVATO
 export function sendMessage() {
   console.log("sendMessage()");
-  let utente = document.getElementById('txtRicevente').value;
+  let utente = this.selectedWhisp;
   let messaggio = document.getElementById('txtMessage').value;
 
   // Crea una stringa con i nick ordinati che indicherà la chat nel DB
@@ -66,7 +67,7 @@ export function sendMessage() {
 
 // AGGIUNGE IL MESSAGGIO PRIVATO ALLA DISCUSSIONE NEL DB
 export function aggiungi() {
-  let utente = document.getElementById('txtRicevente').value;
+  let utente = this.selectedWhisp;
   let messaggio = document.getElementById('txtMessage').value;
 
   let stringa = this.state.info_user.display_name > utente ? "chat_" + utente + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + utente;
@@ -80,9 +81,9 @@ export function aggiungi() {
     // Aggiunge il messaggio alla lista nella finestra
     if(!document.getElementById("lista_discussione_" + utente))
     {
-      this.whispRef.current.addChat("lista_discussione_" + utente);
+      this.whispRef.current.addChat(utente);
     }
-    this.whispRef.current.addMessage(this.state.info_user.display_name + ": " + messaggio, "lista_discussione_" + utente);
+    this.whispRef.current.addMessage(this.state.info_user.display_name + ": " + messaggio, utente);
   })
   .catch(function(error) {
     console.error("Error adding document: ", error);
@@ -169,14 +170,14 @@ export function addLastchatListener() {
         }.bind(this);
         document.getElementById("bottoniWhisperers").appendChild(button);
 
-        this.whispRef.current.addChat("lista_discussione_" + us);
-        this.whispRef.current.hideList("lista_discussione_" + us);
+        this.whispRef.current.addChat(us);
+        this.whispRef.current.hideList(us);
         let stringa = this.state.info_user.display_name > us ? "chat_" + us + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + us;
         this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
           // Scorre i messaggi del DB e li aggiunge alla lista
           querySnapshot.forEach((doc) => {
               let msg = doc.data();
-              this.whispRef.current.addMessage(msg.users + ": " + msg.mess, "lista_discussione_" + us);
+              this.whispRef.current.addMessage(msg.users + ": " + msg.mess, us);
           });
           // Se c'è una richiesta di coop viene aggiunta alla chat
           if(da_leggere[us].richiesta) {
@@ -250,5 +251,5 @@ export function msgRichiestaCoop(us) {
     // Rimmuove i bottoni accetta/rifiuta dalla chat
     e.path[2].removeChild(e.path[1]);
   }.bind(this);
-  this.whispRef.current.addElementMessage([btnAcc, btnRif], "lista_discussione_" + us);
+  this.whispRef.current.addElementMessage([btnAcc, btnRif], us);
 }

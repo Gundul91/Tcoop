@@ -7,7 +7,7 @@ class Whisperers extends Component {
    */
   addChat(listId) {
     let ul = document.createElement("UL");
-    ul.id = listId;
+    ul.id = "lista_discussione_" + listId;
     document.getElementById('discussione').appendChild(ul);
   }
 
@@ -17,7 +17,7 @@ class Whisperers extends Component {
   addMessage(messaggio, listId) {
     let li = document.createElement("LI");
     li.innerHTML = messaggio;
-    document.getElementById(listId).appendChild(li);
+    document.getElementById("lista_discussione_" + listId).appendChild(li);
   }
 
   /* Aggiunge messaggio alla lista "listId"
@@ -26,7 +26,7 @@ class Whisperers extends Component {
   addElementMessage(elements, listId) {
     let li = document.createElement("LI");
     elements.forEach((el) => li.appendChild(el));
-    document.getElementById(listId).appendChild(li);
+    document.getElementById("lista_discussione_" + listId).appendChild(li);
   }
 
 
@@ -34,7 +34,7 @@ class Whisperers extends Component {
    *
    */
   hideList(listId) {
-    let whispAperta = document.getElementById(listId);
+    let whispAperta = document.getElementById("lista_discussione_" + listId);
     whispAperta.className = "whisp";
   }
 
@@ -42,8 +42,27 @@ class Whisperers extends Component {
    *
    */
   showList(listId) {
-    let whispAperta = document.getElementById(listId);
-    whispAperta.className = "selectedWhisp";
+    let whispAperta = document.querySelector(".selectedWhisp");
+    if(whispAperta)
+      whispAperta.className = "whisp";
+    let newWhisp = document.getElementById("lista_discussione_" + listId);
+    if(newWhisp)
+    {
+      newWhisp.className = "selectedWhisp";
+    } else {
+      this.addChat(listId);
+      (document.getElementById("lista_discussione_" + listId)).className = "selectedWhisp";
+    }
+    this.props.msgClick();
+  }
+
+  /* Nasconde lista lista attualmente aperta
+   *
+   */
+  hideShowedList() {
+    let whispAperta = document.querySelector(".selectedWhisp");
+    if(whispAperta)
+      whispAperta.className = "whisp";
   }
 
   render() {
@@ -55,10 +74,8 @@ class Whisperers extends Component {
         <div id="discussione">
 
         </div>
-        A chi mandare:
-        <input type="text" id="txtRicevente" placeholder="Nick ricevente"></input><br/>
         Messaggi:
-        <input type="text" id="txtMessage" placeholder="Inserisci il messaggio" onClick={this.props.msgClick}></input><br/>
+        <input type="text" id="txtMessage" placeholder="Inserisci il messaggio"></input><br/>
         Pres:
         <button className="sendMessage" onClick={this.props.sendMessage}>Manda messaggio</button>
       </div>

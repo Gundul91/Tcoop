@@ -237,7 +237,6 @@ class Home extends Component {
   }
 
   setCoop() {
-
     this.db.collection("user").doc(this.state.info_user.login).get().then((doc) => {
       console.log("!doc.data()",!doc.data());
       if(doc.data() && !(doc.data()).coop)
@@ -295,7 +294,8 @@ class Home extends Component {
       part.style.display = "block";
       part.disabled = false;
       part.innerHtml = "PARTECIPA!";
-
+      this.whispRef.current.showList(this.selectedStreaming);
+      this.selectedWhisp = this.selectedStreaming;
       //Scateno il resize per far calcolare le proporzioni delle views
       window.dispatchEvent(new Event('resize'));
 
@@ -308,12 +308,13 @@ class Home extends Component {
         anteprima.style.display = "none";
         document.querySelector(".cover").style.display = "none";
         document.querySelector(".partecipa").style.display = "none";
+        this.whispRef.current.hideShowedList();
         // Rimuovo il listener per il resize della finestra
         ref.removeListener();
         ReactDOM.unmountComponentAtNode(anteprima);
         // Rimuovo questo click event handler
         event.currentTarget.removeEventListener(event.type, handler);
-      });
+      }.bind(this));
     });
 
   }
