@@ -106,7 +106,6 @@ class ViewsPage extends Component {
     window.addEventListener("resize", this.viewsSizeBindato);
     if(this.props.location && this.props.location.state)
     {
-      this.contatori = [];
       this.state.info_user = this.props.location.state.info_user;
       console.log("this.state.info_user", this.state.info_user);
       requireFB.bind(this)();

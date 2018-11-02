@@ -259,8 +259,6 @@ class Home extends Component {
   // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
   componentDidMount() {
     this.setState({});
-    this.contatori = {}; // Per MESSAGGI
-    // SOSTITUIRE CONTATORI CON new Date().valueOf(); CHE RESTITUISCE UN NUMERO INTERO BASATO SUL TEMPO
 
     // X TEST
     document.getElementById('txtUser').value = this.state.info_user.display_name;

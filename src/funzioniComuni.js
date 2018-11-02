@@ -61,20 +61,7 @@ export function sendMessage() {
   });
 
   // Aggiungo al DB il messaggio
-  if(this.contatori[utente]){
-      // Calcolo il valore da dare al contatore di questa chat che verrà usato come key del messaggio
-      this.contatori[utente] = (this.contatori[utente][this.contatori[utente].length-1] === "9") ? (this.contatori[utente] + 1) : (parseInt(this.contatori[utente]) + 1).toString();
-      aggiungi.bind(this)();
-  } else {
-    this.contatori[utente] = 0;
-    // Trovo l'ultima key dela chat e da questa calcolo la successiva
-    this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
-      let lastDocID = (querySnapshot.docs.length > 0) ? querySnapshot.docs[querySnapshot.docs.length - 1].id : -1;
-      this.contatori[utente] = (lastDocID[lastDocID.length-1] === "9") ? lastDocID + 1 : parseInt(lastDocID) + 1;
-      this.contatori[utente] = this.contatori[utente].toString();
-      aggiungi.bind(this)();
-    });
-  }
+  aggiungi.bind(this)();
 }
 
 // AGGIUNGE IL MESSAGGIO PRIVATO ALLA DISCUSSIONE NEL DB
@@ -83,7 +70,9 @@ export function aggiungi() {
   let messaggio = document.getElementById('txtMessage').value;
 
   let stringa = this.state.info_user.display_name > utente ? "chat_" + utente + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + utente;
-  this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc(this.contatori[utente]).set({
+  // Uso un integer che indica il tempo come chiave dei messaggi nel DB
+  let t = new Date().valueOf();
+  this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).doc(t.toString()).set({
     mess: messaggio,
     users: this.state.info_user.display_name
   })
