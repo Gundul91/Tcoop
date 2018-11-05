@@ -8,6 +8,7 @@ class Whisperers extends Component {
   addChat(listId) {
     let ul = document.createElement("UL");
     ul.id = "lista_discussione_" + listId;
+    ul.className = "whisp";
     document.getElementById('discussione').appendChild(ul);
   }
 

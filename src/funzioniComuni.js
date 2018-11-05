@@ -38,7 +38,6 @@ export function msgClick() {
   let whispAperta = document.querySelector(".selectedWhisp");
   if(whispAperta) {
     // whispAperta.id.substring(18) prende solo la stringa dopo i primi 18 caratteri che contiene il nome dello streamer
-    console.log("---", this.state.info_user.display_name, whispAperta);
     this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista").update({
       [whispAperta.id.substring(18)]: this.firebase.firestore.FieldValue.delete()
     });
@@ -78,11 +77,6 @@ export function aggiungi() {
     users: this.state.info_user.display_name
   })
   .then(() => {
-    // Aggiunge il messaggio alla lista nella finestra
-    if(!document.getElementById("lista_discussione_" + utente))
-    {
-      this.whispRef.current.addChat(utente);
-    }
     this.whispRef.current.addMessage(this.state.info_user.display_name + ": " + messaggio, utente);
   })
   .catch(function(error) {
@@ -145,46 +139,13 @@ export function addLastchatListener() {
   this.unsubscribeUserChat = this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista")
   .onSnapshot(function(doc) {
     let da_leggere = doc.data();
-    console.log("cambiato: ", da_leggere);
+    console.log("cambiato: ", document.querySelector(".selectedWhisp"));
     // us sono le key che sono i nick mentre da_leggere e l'array di messaggi_da_leggere
     for(let us in da_leggere)
     {
-      // Se la lista non esiste la crea e la riempie
-      if(!document.getElementById("lista_discussione_" + us))
+      if(document.getElementById("lista_discussione_" + us))
       {
-        let button = document.createElement("BUTTON");
-        let dbRef = this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista");
-        button.innerHTML = us;
-        button.style.backgroundColor = "red";
-        button.onclick = function(el) {
-          el.target.style.backgroundColor = "";
-          // Rimmuove us dalla lista dei messaggi da leggere
-          dbRef.update({
-            [us]: this.firebase.firestore.FieldValue.delete()
-          });
-          // Cambia le classi alle liste per visualizzare qulla selezionata
-          let whispAperta = document.querySelector(".selectedWhisp");
-          if(whispAperta)
-            whispAperta.className = "whisp";
-          document.getElementById("lista_discussione_" + us).className = "selectedWhisp";
-        }.bind(this);
-        document.getElementById("bottoniWhisperers").appendChild(button);
-
-        this.whispRef.current.addChat(us);
-        this.whispRef.current.hideList(us);
-        let stringa = this.state.info_user.display_name > us ? "chat_" + us + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + us;
-        this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
-          // Scorre i messaggi del DB e li aggiunge alla lista
-          querySnapshot.forEach((doc) => {
-              let msg = doc.data();
-              this.whispRef.current.addMessage(msg.users + ": " + msg.mess, us);
-          });
-          // Se c'è una richiesta di coop viene aggiunta alla chat
-          if(da_leggere[us].richiesta) {
-            msgRichiestaCoop.bind(this)(us);
-          }
-        });
-      } else {
+        console.log("esiste");
         // Se la lista esiste aggiunge il messaggio ad essa
         if(da_leggere[us].richiesta) {
           msgRichiestaCoop.bind(this)(us);
@@ -192,6 +153,46 @@ export function addLastchatListener() {
           let li = document.createElement("LI");
           li.innerHTML = us + ": " + da_leggere[us].messaggio;
           document.getElementById("lista_discussione_" + us).appendChild(li);
+        }
+      }
+
+      if(!document.querySelector(".selectedWhisp") || (document.querySelector(".selectedWhisp")).id !== "lista_discussione_" + us)
+      {
+        let button = document.getElementById("bottone_chat_" + us);
+        if(!button)
+        {
+          button = document.createElement("BUTTON");
+          let dbRef = this.db.collection("chat").doc(this.state.info_user.display_name).collection("messaggi_da_leggere").doc("lista");
+          button.innerHTML = us;
+          button.id="bottone_chat_" + us;
+          button.onclick = function(el) {
+            el.target.style.backgroundColor = "";
+            // Rimmuove us dalla lista dei messaggi da leggere
+            dbRef.update({
+              [us]: this.firebase.firestore.FieldValue.delete()
+            });
+            this.whispRef.current.showList(us);
+          }.bind(this);
+          document.getElementById("bottoniWhisperers").appendChild(button);
+        }
+        button.style.backgroundColor = "red";
+        if(!document.getElementById("lista_discussione_" + us))
+        {
+          this.whispRef.current.addChat(us);
+          let stringa = this.state.info_user.display_name > us ? "chat_" + us + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + us;
+          this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
+            // Scorre i messaggi del DB e li aggiunge alla lista
+            querySnapshot.forEach((doc) => {
+                let msg = doc.data();
+                this.whispRef.current.addMessage(msg.users + ": " + msg.mess, us);
+            });
+            // Se c'è una richiesta di coop viene aggiunta alla chat
+            if(da_leggere[us].richiesta) {
+              msgRichiestaCoop.bind(this)(us);
+            }
+          });
+        } else {
+
         }
       }
     }

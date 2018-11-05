@@ -295,6 +295,17 @@ class Home extends Component {
       part.disabled = false;
       part.innerHtml = "PARTECIPA!";
       this.whispRef.current.showList(this.selectedStreaming);
+      if(!(document.getElementById("lista_discussione_" + this.selectedStreaming)).innerHTML)
+      {
+        let stringa = this.state.info_user.display_name > this.selectedStreaming ? "chat_" + this.selectedStreaming + "_" + this.state.info_user.display_name : "chat_" + this.state.info_user.display_name + "_" + this.selectedStreaming;
+        this.db.collection("chat").doc("chat_con_messaggi").collection(stringa).get().then((querySnapshot) => {
+          // Scorre i messaggi del DB e li aggiunge alla lista
+          querySnapshot.forEach((doc) => {
+              let msg = doc.data();
+              this.whispRef.current.addMessage(msg.users + ": " + msg.mess, this.selectedStreaming);
+          });
+        });
+      }
       this.selectedWhisp = this.selectedStreaming;
       //Scateno il resize per far calcolare le proporzioni delle views
       window.dispatchEvent(new Event('resize'));
@@ -308,13 +319,16 @@ class Home extends Component {
         anteprima.style.display = "none";
         document.querySelector(".cover").style.display = "none";
         document.querySelector(".partecipa").style.display = "none";
-        this.whispRef.current.hideShowedList();
+        // Ho dovuto riscriverla al posto di usare hideShowedList() per non dover usare il bind(this) che crea problemi nella rimozione del listener
+        let whispAperta = document.querySelector(".selectedWhisp");
+        if(whispAperta)
+          whispAperta.className = "whisp";
         // Rimuovo il listener per il resize della finestra
         ref.removeListener();
         ReactDOM.unmountComponentAtNode(anteprima);
         // Rimuovo questo click event handler
         event.currentTarget.removeEventListener(event.type, handler);
-      }.bind(this));
+      });
     });
 
   }
