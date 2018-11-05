@@ -171,6 +171,7 @@ export function addLastchatListener() {
             dbRef.update({
               [us]: this.firebase.firestore.FieldValue.delete()
             });
+            this.selectedWhisp = us;
             this.whispRef.current.showList(us);
           }.bind(this);
           document.getElementById("bottoniWhisperers").appendChild(button);
