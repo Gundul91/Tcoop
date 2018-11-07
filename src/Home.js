@@ -91,7 +91,7 @@ class Home extends Component {
     });
   }
 
-  // IMPOSTA LA BARRA PER CHI NON è IN LISTA
+  // RIMMUOVE DALLA LISTA
   removeList() {
     document.querySelector(".AddButton").style.display = "inline-block";
     document.querySelector(".DeleteButton").style.display = "none";
@@ -157,7 +157,7 @@ class Home extends Component {
     this.state.filtro = "";
   }
 
-  // INIZIALIZZO IL COLLEGAMENTO CON IL DB DI this.firebase
+  // INIZIALIZZO IL COLLEGAMENTO CON IL DB DI this.firebase E PRENDO I DATI UTENTE
   componentWillMount() {
     this.whispRef = React.createRef();
     requireFB.bind(this)();
@@ -236,9 +236,10 @@ class Home extends Component {
     }.bind(this));
   }
 
+  // SETTA I VALORI BASE DI COOP NEL DB
   setCoop() {
     this.db.collection("user").doc(this.state.info_user.login).get().then((doc) => {
-      console.log("!doc.data()",!doc.data());
+      // Se non ci sono ancora valori per la coop da i valori base
       if(doc.data() && !(doc.data()).coop)
       {
         this.db.collection("user").doc(this.state.info_user.login).set({
@@ -255,7 +256,6 @@ class Home extends Component {
     });
   }
 
-  // IN CASO DI ACCESSO CON TWITCH PRENDO I DATI DELL'UTENTE
   componentDidMount() {
     this.setState({});
 

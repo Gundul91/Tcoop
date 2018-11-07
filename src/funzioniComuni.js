@@ -7,8 +7,8 @@ export function requireFB() {
   require("firebase/firestore");
 }
 
+// INIZIALIZZA FIREBASE
 export function initDB() {
-
   // Se this.firebase è già inizializzato non ripete l'inizializzazione
   if (!this.firebase.apps.length) {
     // Settings per this.firebase
@@ -84,6 +84,7 @@ export function aggiungi() {
   });
 }
 
+// PASSA ALLA PAGINA DELLA COOP
 export function toCoop() {
   this.db.collection("user").doc(this.state.info_user.login).get().then(function(doc){
     // Rimmuovo i listener sui cambiamenti nel DB
@@ -200,6 +201,7 @@ export function addLastchatListener() {
   }.bind(this));
 }
 
+// AGGIUNGE ALLA CHAT IL MESSAGGIO CONTENENTE I BOTTONI DELLA RICHIESTA DI COOP
 export function msgRichiestaCoop(us) {
   let btnAcc = document.createElement("button");
   btnAcc.className = "accetta";
