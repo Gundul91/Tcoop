@@ -439,6 +439,7 @@ class Home extends Component {
         <button className="partecipa" onClick={this.partecipa.bind(this)}>PARTECIPA!</button>
         <InputAdd addToDB={this.addToDB.bind(this)}/>
         <div className="boxTest">
+          <h3 class="TestoTest">TEST</h3>
           <a href="https://id.twitch.tv/oauth2/authorize?client_id=upk8rrcojp2raiw9pd2edhi0bvhze5&redirect_uri=http://localhost:3000/&response_type=token&scope=user:read:email">Accedi con Twitch</a>
           <br/>
           <button className="AddButtonTest" onClick={this.addToList.bind(this)} >Aggiungiti alla lista</button>
